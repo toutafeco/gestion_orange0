@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion Immeuble — liberté 2 Orange </title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B; --blue:#2E6DB4; --blue-lt:#D6E4F0;
+    --green:#1A5C38; --green-md:#27AE60; --green-lt:#D5F5E3;
+    --gold:#F39C12; --gold-lt:#FEF9E7;
+    --red:#C0392B; --red-lt:#FDEDEC;
+    --bg:#F4F7FB; --card:#fff;
+    --radius:12px; --shadow:0 2px 16px rgba(27,58,107,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1a1a2e;min-height:100vh}
+
+  /* ── Header ── */
+  header{background:linear-gradient(135deg,var(--navy),var(--blue));padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+  header h1{font-family:'DM Serif Display',serif;color:#fff;font-size:1.7rem;letter-spacing:.3px}
+  header p{color:rgba(255,255,255,.75);font-size:.85rem;margin-top:2px}
+  .hbadge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600}
+
+  /* ── Tabs ── */
+  .tabs{display:flex;gap:4px;padding:20px 40px 0;background:#fff;border-bottom:2px solid #e8eef7}
+  .tab{padding:12px 24px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:500;font-size:.9rem;color:#666;transition:.2s;border:none;background:none}
+  .tab.active{background:var(--navy);color:#fff;font-weight:600}
+  .tab:hover:not(.active){background:var(--blue-lt);color:var(--navy)}
+
+  /* ── Main layout ── */
+  main{padding:32px 40px;max-width:1400px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* ── Cards ── */
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:24px}
+  .card-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+
+  /* ── KPI row ── */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+  .kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;border-left:4px solid var(--blue)}
+  .kpi.green{border-color:var(--green-md)}
+  .kpi.gold{border-color:var(--gold)}
+  .kpi.red{border-color:var(--red)}
+  .kpi-label{font-size:.78rem;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+  .kpi-val{font-size:1.5rem;font-weight:700;color:var(--navy)}
+  .kpi.green .kpi-val{color:var(--green)}
+  .kpi.gold .kpi-val{color:var(--gold)}
+  .kpi.red .kpi-val{color:var(--red)}
+
+  /* ── Form grid ── */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group.wide{grid-column:span 2}
+  label{font-size:.78rem;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.4px}
+  input,select,textarea{
+    padding:10px 12px;border:1.5px solid #dde3ef;border-radius:8px;
+    font-family:'DM Sans',sans-serif;font-size:.9rem;color:#1a1a2e;
+    background:#f9fbff;transition:.2s;outline:none
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(46,109,180,.12)}
+  textarea{resize:vertical;min-height:60px}
+  select{cursor:pointer}
+
+  /* ── Buttons ── */
+  .btn{padding:11px 22px;border-radius:8px;border:none;font-weight:600;font-size:.88rem;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:7px}
+  .btn-primary{background:var(--navy);color:#fff}
+  .btn-primary:hover{background:var(--blue)}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-green:hover{background:var(--green-md)}
+  .btn-gold{background:var(--gold);color:#fff}
+  .btn-gold:hover{background:#e67e22}
+  .btn-danger{background:var(--red);color:#fff}
+  .btn-danger:hover{background:#e74c3c}
+  .btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
+  .btn-outline:hover{background:var(--blue-lt)}
+  .btn-sm{padding:6px 14px;font-size:.8rem;border-radius:6px}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+
+  /* ── Table ── */
+  .tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #e2eaf5}
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  thead th{background:var(--navy);color:#fff;padding:11px 12px;text-align:left;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  tbody tr{border-bottom:1px solid #edf2fb;transition:.15s}
+  tbody tr:hover{background:#f0f6ff}
+  tbody td{padding:10px 12px;vertical-align:middle}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:600}
+  .badge-rdc{background:#D6E4F0;color:#1B3A6B}
+  .badge-1er{background:#EBF5FB;color:#1B3A6B}
+  .badge-2e{background:#D5F5E3;color:#1A5C38}
+  .badge-mbao{background:#FEF9E7;color:#7D6608}
+  .badge-out{background:#FDEDEC;color:#C0392B}
+  .badge-salaire{background:#EBF5FB;color:#1B3A6B}
+  .badge-internet{background:#E8F8F5;color:#1A5C38}
+  .badge-elec{background:#FEF9E7;color:#7D6608}
+  .badge-travaux{background:#F5EEF8;color:#6C3483}
+  .badge-transfert{background:#FDEDEC;color:#922B21}
+  td.amount{font-weight:600;color:var(--green);text-align:right;font-family:'DM Mono',monospace,sans-serif;white-space:nowrap}
+  td.amount.out{color:var(--red)}
+  .actions{display:flex;gap:6px}
+  .no-data{text-align:center;color:#aaa;padding:40px;font-style:italic}
+
+  /* ── Section header in table ── */
+  .sec-row td{background:var(--blue-lt);color:var(--navy);font-weight:700;font-size:.82rem;padding:7px 12px}
+
+  /* ── Export area ── */
+  .export-box{background:var(--gold-lt);border:1.5px dashed var(--gold);border-radius:10px;padding:20px;margin-top:20px}
+  .export-box h3{color:#7D6608;margin-bottom:8px;font-size:.95rem}
+  pre{font-size:.78rem;background:#fff;border:1px solid #e8e0c8;border-radius:8px;padding:14px;max-height:200px;overflow-y:auto;white-space:pre-wrap;color:#333}
+
+  /* ── Toast ── */
+  #toast{position:fixed;bottom:30px;right:30px;background:var(--green);color:#fff;padding:13px 22px;border-radius:10px;font-weight:600;font-size:.88rem;box-shadow:0 6px 24px rgba(0,0,0,.2);opacity:0;transform:translateY(20px);transition:.3s;z-index:9999;display:flex;align-items:center;gap:8px}
+  #toast.show{opacity:1;transform:translateY(0)}
+  #toast.error{background:var(--red)}
+
+  /* ── Synthèse ── */
+  .synth-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:700px){.synth-grid{grid-template-columns:1fr}.tabs{padding:16px 16px 0}.main{padding:16px}.form-grid{grid-template-columns:1fr}}
+  .synth-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #edf2fb;font-size:.9rem}
+  .synth-row:last-child{border:none}
+  .synth-row .lbl{color:#555}
+  .synth-row .val{font-weight:700;color:var(--navy)}
+  .synth-row .val.green{color:var(--green)}
+  .synth-row .val.red{color:var(--red)}
+  .synth-total{background:var(--navy);color:#fff;border-radius:8px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .synth-total .lbl{font-size:.9rem;opacity:.85}
+  .synth-total .val{font-size:1.2rem;font-weight:700}
+  .progress-bar{height:8px;border-radius:4px;background:#e8eef7;overflow:hidden;margin-top:4px}
+  .progress-fill{height:100%;border-radius:4px;background:var(--blue);transition:.6s}
+
+  /* ── PANEL UTILISATEURS (admin) ── */
+  .users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+  .user-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px;
+    border-left:4px solid var(--blue);position:relative;transition:.2s}
+  .user-card:hover{transform:translateY(-2px)}
+  .user-card.admin{border-color:var(--gold)}
+  .user-card.proprio{border-color:var(--navy)}
+  .user-card.locataire{border-color:var(--green-md)}
+  .user-card.gestionnaire{border-color:#9B59B6}
+  .uc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .uc-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:1.3rem;font-weight:700;color:#fff;flex-shrink:0}
+  .uc-name{font-weight:700;color:var(--navy);font-size:.95rem}
+  .uc-login{font-size:.78rem;color:#888;margin-top:1px}
+  .role-badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.73rem;font-weight:700;margin-bottom:10px}
+  .rb-admin{background:#FEF9E7;color:#9A7A2E}
+  .rb-proprio{background:#D6E4F0;color:#1B3A6B}
+  .rb-locataire{background:#D5F5E3;color:#1A5C38}
+  .rb-gestionnaire{background:#F5EEF8;color:#6C3483}
+  .uc-info{font-size:.82rem;color:#666;line-height:1.8;margin-bottom:12px}
+  .uc-actions{display:flex;gap:8px}
+  .btn-edit-user{background:#e67e22;color:#fff;border:none;padding:7px 14px;border-radius:7px;
+    font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .btn-del-user{background:#FDEDEC;color:#C0392B;border:1.5px solid #C0392B;padding:7px 14px;
+    border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .btn-reset-pw{background:var(--blue-lt);color:var(--navy);border:none;padding:7px 14px;
+    border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+  /* ── Access restricted notice ── */
+  .access-denied{text-align:center;padding:60px 20px;color:#aaa}
+  .access-denied .icon{font-size:3rem;margin-bottom:12px}
+  .access-denied p{font-size:.95rem}
+
+
+  .menu-item{width:100%;text-align:left;padding:9px 12px;border:none;background:none;cursor:pointer;
+    border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--navy);
+    display:block;text-decoration:none;transition:.15s}
+  .menu-item:hover{background:#f0f6ff}
+  .menu-item-danger{color:#C0392B!important;font-weight:600}
+  .menu-item-danger:hover{background:#FDEDEC!important}
+
+  /* ── Bouton modifier ── */
+  .btn-edit{background:#e67e22;color:#fff}
+  .btn-edit:hover{background:#d35400}
+
+  /* ── Barre de recherche ── */
+  .search-bar{display:flex;align-items:center;gap:10px;background:#fff;
+    border:1.5px solid #dde3ef;border-radius:10px;padding:8px 14px;
+    box-shadow:0 2px 8px rgba(27,58,107,.06);margin-bottom:16px}
+  .search-bar input{border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;
+    font-size:.9rem;color:#1a1a2e;flex:1;min-width:0}
+  .search-bar span{color:#aab;font-size:1.1rem}
+  .search-count{font-size:.75rem;color:#888;white-space:nowrap;padding:3px 9px;
+    background:#f0f4fb;border-radius:20px}
+
+  /* ── Modal modification ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(27,58,107,.55);
+    backdrop-filter:blur(4px);z-index:9000;display:none;
+    align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal-box{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);
+    width:100%;max-width:680px;max-height:90vh;overflow-y:auto;
+    animation:modalIn .28s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes modalIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+  .modal-head{background:linear-gradient(135deg,var(--navy),var(--blue));
+    padding:20px 24px;border-radius:16px 16px 0 0;
+    display:flex;align-items:center;justify-content:space-between}
+  .modal-head h3{color:#fff;font-family:'DM Serif Display',serif;font-size:1.15rem}
+  .modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;
+    width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.2s}
+  .modal-close:hover{background:rgba(255,255,255,.4)}
+  .modal-body{padding:24px}
+  .modal-footer{padding:16px 24px;border-top:1px solid #edf2fb;
+    display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  .highlight-row{background:#fff8e1 !important;outline:2px solid #F39C12;}
+   .menu-container { display: flex; justify-content: center; gap: 50px; margin-bottom: 60px; }
+  /* ── CONNEXION ── */
+  #loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#0F1E3C 0%,#1B3A6B 55%,#2E6DB4 100%);
+    display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px}
+  #loginScreen.hidden{display:none}
+  .login-card{background:#fff;border-radius:20px;padding:40px;width:100%;max-width:400px;
+    box-shadow:0 30px 80px rgba(0,0,0,.35)}
+  .login-card h2{font-family:'DM Serif Display',serif;color:var(--navy);text-align:center;margin-bottom:6px}
+  .login-card p{text-align:center;color:#888;font-size:.88rem;margin-bottom:24px}
+  .login-field{margin-bottom:16px}
+  .login-field label{display:block;margin-bottom:6px}
+  .login-field input{width:100%;padding:12px 14px}
+  .login-btn{width:100%;padding:13px;border:0;border-radius:8px;background:var(--navy);color:#fff;
+    font-weight:700;font-size:.95rem;cursor:pointer}
+  .login-error{display:none;background:#FDEDEC;color:var(--red);border:1px solid var(--red);
+    border-radius:8px;padding:10px;margin-bottom:14px;text-align:center;font-size:.85rem}
+  .login-error.show{display:block}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Firebase (client) - ajoutez votre configuration Firebase ci-dessous -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script>
+  // Remote sync helpers (Firestore)
+  let FIREBASE_ENABLED = false;
+  let dbRemote = null;
+  let authRemote = null;
+  let firebaseUser = null;
+  let firebaseProfileError = null;
+
+  // Remplacez les valeurs ci-dessous par votre configuration Firebase
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyD1V0yNzaSTuztElnMgyu8czHCt0JAf8n4",
+    authDomain: "toutaf-f191f.firebaseapp.com",
+    projectId: "toutaf-f191f",
+    storageBucket: "toutaf-f191f.firebasestorage.app",
+    messagingSenderId: "839117369578",
+    appId: "1:839117369578:web:63193f8d8931fbd6cb6793",
+    measurementId: "G-CTQJDET0MM"
+  };
+
+  function initFirebase(config = FIREBASE_CONFIG){
+    try{
+      if(!config || (config.apiKey && config.apiKey.indexOf('<') === 0)){
+        console.warn('Firebase config not set — remote sync disabled.');
+        return;
+      }
+      firebase.initializeApp(config);
+      dbRemote = firebase.firestore();
+      authRemote = firebase.auth();
+      FIREBASE_ENABLED = true;
+      console.log('Firebase initialized — remote sync enabled');
+    }catch(e){
+      console.error('Error initializing Firebase', e);
+    }
+  }
+
+  function getFirebaseEmail(value){
+    const email = String(value || '').trim().toLowerCase();
+    return email.includes('@') ? email : '';
+  }
+
+  function pseudoToEmail(pseudo){
+    const clean = String(pseudo || '').trim().toLowerCase();
+    return clean ? clean.replace(/[^a-z0-9._-]/g,'')+'@toutaf-f191f.firebaseapp.com' : '';
+  }
+
+  async function signOutRemote(){
+    if(authRemote) await authRemote.signOut();
+    firebaseUser = null;
+  }
+
+  async function readRemoteCollection(name){
+    if(!FIREBASE_ENABLED) return null;
+    try{
+      let query = dbRemote.collection(name);
+      if(name === 'entrees' && typeof currentUser !== 'undefined'
+        && currentUser?.role === 'locataire' && currentUser.logement){
+        query = query.where('log','==',currentUser.logement);
+      }
+      const snap = await query.get();
+      return snap.docs.map(doc=>{
+        const value = {...doc.data()};
+        const numericId = Number(doc.id);
+        value.id = Number.isFinite(numericId) && String(numericId) === doc.id ? numericId : doc.id;
+        return value;
+      });
+    }catch(e){ console.error('Lecture Firebase '+name,e); return null; }
+  }
+
+  async function readRemoteUserProfile(uid){
+    if(!FIREBASE_ENABLED || !uid) return null;
+    firebaseProfileError = null;
+    try{
+      const doc = await dbRemote.collection('users').doc(uid).get();
+      return doc.exists ? {id:uid,...doc.data()} : null;
+    }catch(e){
+      console.error('Lecture profil Firebase',e);
+      firebaseProfileError = e.code || 'unknown-error';
+      return null;
+    }
+  }
+
+  async function writeRemoteItem(name, item){
+    if(!FIREBASE_ENABLED || item?.id == null) return false;
+    try{
+      const data = {...item}; delete data.id;
+      await dbRemote.collection(name).doc(String(item.id)).set(data);
+      return true;
+    }catch(e){ console.error('Écriture Firebase '+name,e); return false; }
+  }
+
+  async function deleteRemoteItem(name, id){
+    if(!FIREBASE_ENABLED || id == null) return false;
+    try{ await dbRemote.collection(name).doc(String(id)).delete(); return true; }
+    catch(e){ console.error('Suppression Firebase '+name,e); return false; }
+  }
+
+  async function writeRemoteCollection(name, items){
+    if(!FIREBASE_ENABLED) return;
+    for(const item of items) await writeRemoteItem(name,item);
+  }
+</script>
+</head>
+<body>
+
+
+  
+
+<header>
+  <div>
+    <h1>🏢 Gestion Immeuble — Liberté 2 Orange</h1>
+    <p id="headerSub">Dakar · Suivi des entrées et sorties par logement</p>
+  </div>
+  <span class="hbadge" id="lastSaved">💾 Données locales</span>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('synthese')">📊 Synthèse</button>
+  <button class="tab" onclick="switchTab('entrees')">📥 Entrées</button>
+  <button class="tab" onclick="switchTab('sorties')">📤 Sorties</button>
+  <button class="tab" onclick="switchTab('exporter')">📋 Exporter CSV</button>
+  <button class="tab" onclick="switchTab('audit')">Audit & Stock</button>
+</div>
+
+<main>
+
+<!-- ════════════════ SYNTHÈSE ════════════════ -->
+<div class="panel active" id="panel-synthese">
+  <div class="kpis" id="kpiRow"></div>
+  <div class="synth-grid">
+    <div class="card">
+      <div class="card-title">📥 Entrées par logement</div>
+      <div id="synthEntrees"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📤 Sorties par catégorie</div>
+      <div id="synthSorties"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">📶 Suivi Internet / Gnima</div>
+    <div id="synthGnima"></div>
+  </div>
+</div>
+
+<!-- ════════════════ ENTRÉES ════════════════ -->
+<div class="panel" id="panel-entrees">
+  <div class="card">
+    <div class="card-title">➕ Nouvelle entrée</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="e_date">
+      </div>
+      <div class="form-group wide">
+        <label>Désignation / Client</label>
+        <input type="text" id="e_desig" placeholder="Ex: Simon — Loyer Juin 2026">
+      </div>
+      <div class="form-group">
+        <label>Logement</label>
+        <select id="e_log">
+          <option value="RDC">🏠 RDC</option>
+          <option value="1er Étage">🏢 1er Étage</option>
+          <option value="2ème Étage">🏬 2ème Étage</option>
+          <option value="Sicap Mbao">🏘️ Sicap Mbao</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Plateforme</label>
+        <select id="e_plat">
+          <option value="Direct">Direct</option>
+          <option value="Airbnb">Airbnb</option>
+          <option value="Booking">Booking</option>
+          <option value="Simon">Simon (loyer)</option>
+          <option value="Wave">Wave</option>
+          <option value="Orange">Orange Money</option>
+          <option value="Commission">Commission</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date entrée</label>
+        <input type="date" id="e_de">
+      </div>
+      <div class="form-group">
+        <label>Date sortie</label>
+        <input type="date" id="e_ds">
+      </div>
+      <div class="form-group">
+        <label>Nb jours</label>
+        <input type="number" id="e_nbj" placeholder="auto si dates" min="0">
+      </div>
+      <div class="form-group">
+        <label>Prix/Jour (FCFA)</label>
+        <input type="number" id="e_pj" placeholder="ex: 20000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Prix/Mois (FCFA)</label>
+        <input type="number" id="e_pm" placeholder="ex: 250000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Commission (FCFA)</label>
+        <input type="number" id="e_comm" placeholder="ex: 4000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Charges (FCFA)</label>
+        <input type="number" id="e_chg" placeholder="ex: 2500" min="0">
+      </div>
+      <div class="form-group wide">
+        <label>Notes</label>
+        <input type="text" id="e_notes" placeholder="Notes complémentaires…">
+      </div>
+      <div class="form-group wide">
+        <label>Reçu</label>
+        <input type="file" id="e_receipt" accept="image/*,.pdf">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addEntree()">✅ Ajouter l'entrée</button>
+      <button class="btn btn-outline" onclick="clearEntreeForm()">🗑️ Effacer</button>
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#f0f6ff;border-radius:8px;font-size:.82rem;color:#2E6DB4">
+      💡 <b>Montant brut</b> = calculé auto (Prix/Mois si renseigné, sinon Nb jours × Prix/Jour) &nbsp;|&nbsp; <b>Net</b> = Brut − Commission − Charges
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <span>📋 Toutes les entrées</span>
+      <div class="btn-row" style="margin:0;flex-wrap:wrap">
+        <select id="filterLog" onchange="renderEntrees()" style="padding:6px 10px;font-size:.8rem;border-radius:6px;border:1.5px solid #dde3ef">
+          <option value="">Tous les logements</option>
+          <option value="RDC">🏠 RDC</option>
+          <option value="1er Étage">🏢 1er Étage</option>
+          <option value="2ème Étage">🏬 2ème Étage</option>
+          <option value="Sicap Mbao">🏘️ Sicap Mbao</option>
+        </select>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="searchEntrees" placeholder="Rechercher : client, logement, plateforme, notes…" oninput="renderEntrees()">
+      <span class="search-count" id="countEntrees">0 ligne(s)</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Désignation</th><th>Logement</th><th>Plateforme</th>
+          <th>Entrée</th><th>Sortie</th><th>J</th>
+          <th style="text-align:right">Brut</th>
+          <th style="text-align:right">Comm.</th>
+          <th style="text-align:right">Net</th>
+          <th>Reçu</th><th>Notes</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="tbodyEntrees"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SORTIES ════════════════ -->
+<div class="panel" id="panel-sorties">
+  <div class="card">
+    <div class="card-title">➕ Nouvelle sortie / dépense</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="s_date">
+      </div>
+      <div class="form-group wide">
+        <label>Désignation</label>
+        <input type="text" id="s_desig" placeholder="Ex: Salaire Gnima — Juillet 2026">
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select id="s_cat">
+          <option value="Salaire">🧹 Salaire (Gnima)</option>
+          <option value="Internet">📶 Internet / Wifi</option>
+          <option value="Électricité">💡 Électricité</option>
+          <option value="Eau">💧 Eau</option>
+          <option value="Gaz">🔥 Gaz</option>
+          <option value="Travaux">🔧 Travaux / Plomberie</option>
+          <option value="Équipement">📺 Équipement</option>
+          <option value="Ménage">🧽 Ménage / Divers</option>
+          <option value="Transfert">💸 Transfert M. Emmanuel</option>
+          <option value="Voiture">🚗 Voiture</option>
+          <option value="Amende">🚔 Amende / Police</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Logement concerné</label>
+        <select id="s_log">
+          <option value="Commun">Commun (tous)</option>
+          <option value="RDC">RDC</option>
+          <option value="1er Étage">1er Étage</option>
+          <option value="2ème Étage">2ème Étage</option>
+          <option value="3ème Étage">3ème Étage</option>
+          <option value="M. Emmanuel">M. Emmanuel</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prix unitaire (FCFA)</label>
+        <input type="number" id="s_pu" placeholder="ex: 60000" min="0">
+      </div>
+      <div class="form-group">
+        <label>Quantité / Mois</label>
+        <input type="number" id="s_qte" placeholder="1" min="1" value="1">
+      </div>
+      <div class="form-group">
+        <label>Frais Wave/Fees</label>
+        <input type="number" id="s_wave" placeholder="0" min="0">
+      </div>
+      <div class="form-group wide">
+        <label>Notes</label>
+        <input type="text" id="s_notes" placeholder="Notes…">
+      </div>
+      <div class="form-group wide">
+        <label>Reçu</label>
+        <input type="file" id="s_receipt" accept="image/*,.pdf">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="addSortie()">✅ Ajouter la dépense</button>
+      <button class="btn btn-outline" onclick="clearSortieForm()">🗑️ Effacer</button>
+    </div>
+    <div style="margin-top:14px;padding:12px 16px;background:#e8f8f5;border-radius:8px;font-size:.82rem;color:#1A5C38">
+      💡 <b>Total</b> = Prix unitaire × Quantité + Frais Wave &nbsp;|&nbsp; Salaire Gnima = 60 000 FCFA/mois
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <span>📋 Toutes les dépenses</span>
+      <select id="filterCat" onchange="renderSorties()" style="padding:6px 10px;font-size:.8rem;border-radius:6px;border:1.5px solid #dde3ef">
+        <option value="">Toutes catégories</option>
+        <option value="Salaire">Salaire</option>
+        <option value="Internet">Internet</option>
+        <option value="Électricité">Électricité</option>
+        <option value="Eau">Eau</option>
+        <option value="Gaz">Gaz</option>
+        <option value="Travaux">Travaux</option>
+        <option value="Équipement">Équipement</option>
+        <option value="Ménage">Ménage</option>
+        <option value="Transfert">Transfert</option>
+        <option value="Voiture">Voiture</option>
+        <option value="Amende">Amende</option>
+      </select>
+    </div>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="searchSorties" placeholder="Rechercher : désignation, catégorie, logement, notes…" oninput="renderSorties()">
+      <span class="search-count" id="countSorties">0 ligne(s)</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Désignation</th><th>Catégorie</th><th>Logement</th>
+          <th style="text-align:right">P.U.</th><th>Qté</th>
+          <th style="text-align:right">Wave</th>
+          <th style="text-align:right">Total</th>
+          <th>Reçu</th><th>Notes</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="tbodySorties"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ EXPORT ════════════════ -->
+<div class="panel" id="panel-exporter">
+  <div class="card">
+    <div class="card-title">📋 Exporter les données</div>
+    <p style="color:#666;margin-bottom:18px;font-size:.9rem">Téléchargez vos données en CSV pour les importer dans Excel ou Google Sheets.</p>
+      <div class="btn-row">
+      <button class="btn btn-primary" onclick="exportCSV('entrees')">⬇️ CSV Entrées</button>
+      <button class="btn btn-green" onclick="exportCSV('sorties')">⬇️ CSV Sorties</button>
+      <button class="btn btn-gold" onclick="exportCSV('audit')">⬇️ CSV Audit</button>
+      <button class="btn btn-gold" onclick="exportAll()">⬇️ Export complet JSON</button>
+      <button class="btn btn-outline" onclick="importJSON()">📂 Importer JSON</button>
+      <button class="btn btn-outline" onclick="openAuditImporter()">📂 Importer audit CSV/JSON/XLSX</button>
+    </div>
+    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadJSON(event)">
+    <input type="file" id="auditFileInput" accept=".json,.csv,.xlsx,.xls" style="display:none" onchange="loadAuditFile(event)">
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Aperçu données (JSON brut)</div>
+    <div class="export-box">
+      <h3>Entrées (dernières 5)</h3>
+      <pre id="previewEntrees"></pre>
+    </div>
+    <div class="export-box" style="margin-top:12px">
+      <h3>Sorties (dernières 5)</h3>
+      <pre id="previewSorties"></pre>
+    </div>
+    <div class="export-box" style="margin-top:12px">
+      <h3>Audit (dernières 5)</h3>
+      <pre id="previewAudit"></pre>
+    </div>
+  </div>
+</div>
+
+  <div class="menu-container">
+        <button class="btn-menu active" onclick="switchPage('maison', this)">1. Cliquer ici pour la gestion de stock de la maison</button>
+        <button class="btn-menu" onclick="switchPage('chantier', this)">2. Cliquer ici pour les stocks du chantier BTP</button>
+    </div>
+
+    <div class="menu-container">
+      <div class="menu-card card-audit" onclick="ouvrirAudit()">
+        <div class="menu-icon">📊</div>
+        <h3>Audit Fichier Excel à jours </h3>
+        <p>Fichier mis à jour. Cliquez ci-dessous pour ouvrir le suivi Excel.</p>
+        <a class="menu-btn" href="Audit_Emmanuel_Proprietaire.xlsx" target="_blank">Cliquer ici pour ouvrir le fichier</a>
+      </div>
+
+      <div class="menu-card card-stock" onclick="ouvrirStock()">
+        <div class="menu-icon">📦</div>
+        <h3>Gestion de Stock</h3>
+        <p>Accéder à l'interface de gestion, inventaires et suivi des flux de stock.</p>
+        <a class="menu-btn" href="Stock.HTML" target="_blank">Cliquer ici pour ouvrir le fichier</a>
+      </div>
+    </div>
+
+</main>
+
+<!-- ══ MODAL MODIFIER ENTRÉE ══ -->
+
+<div class="modal-overlay" id="modalEditEntree">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>✏️ Modifier l'entrée</h3>
+      <button class="modal-close" onclick="closeModal('modalEditEntree')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="me_date">
+        </div>
+        <div class="form-group wide">
+          <label>Désignation / Client</label>
+          <input type="text" id="me_desig">
+        </div>
+        <div class="form-group">
+          <label>Logement</label>
+          <select id="me_log">
+            <option value="RDC">🏠 RDC</option>
+            <option value="1er Étage">🏢 1er Étage</option>
+            <option value="2ème Étage">🏬 2ème Étage</option>
+            <option value="Sicap Mbao">🏘️ Sicap Mbao</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Plateforme</label>
+          <select id="me_plat">
+            <option value="Direct">Direct</option>
+            <option value="Airbnb">Airbnb</option>
+            <option value="Booking">Booking</option>
+            <option value="Simon">Simon (loyer)</option>
+            <option value="Wave">Wave</option>
+            <option value="Orange">Orange Money</option>
+            <option value="Commission">Commission</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date entrée</label>
+          <input type="date" id="me_de">
+        </div>
+        <div class="form-group">
+          <label>Date sortie</label>
+          <input type="date" id="me_ds">
+        </div>
+        <div class="form-group">
+          <label>Nb jours</label>
+          <input type="number" id="me_nbj" min="0">
+        </div>
+        <div class="form-group">
+          <label>Prix/Jour (FCFA)</label>
+          <input type="number" id="me_pj" min="0">
+        </div>
+        <div class="form-group">
+          <label>Prix/Mois (FCFA)</label>
+          <input type="number" id="me_pm" min="0">
+        </div>
+        <div class="form-group">
+          <label>Commission (FCFA)</label>
+          <input type="number" id="me_comm" min="0">
+        </div>
+        <div class="form-group">
+          <label>Charges (FCFA)</label>
+          <input type="number" id="me_chg" min="0">
+        </div>
+        <div class="form-group wide">
+          <label>Notes</label>
+          <textarea id="me_notes" rows="3" style="width:100%"></textarea>
+        </div>
+        <div class="form-group wide">
+          <label>Reçu actuel</label>
+          <div id="me_receipt_current" style="font-size:.9rem;color:#333;min-height:32px">—</div>
+        </div>
+        <div class="form-group wide">
+          <label>Remplacer le reçu</label>
+          <input type="file" id="me_receipt" accept="image/*,.pdf">
+        </div>
+      </div>
+      <div style="background:#f0f6ff;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#2E6DB4;margin-top:4px">
+        💡 <b>Net calculé :</b> <span id="me_preview_net" style="font-weight:700">—</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEditEntree()">💾 Enregistrer les modifications</button>
+      <button class="btn btn-outline" onclick="closeModal('modalEditEntree')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL MODIFIER SORTIE ══ -->
+<div class="modal-overlay" id="modalEditSortie">
+  <div class="modal-box">
+    <div class="modal-head" style="background:linear-gradient(135deg,var(--green),var(--green-md))">
+      <h3>✏️ Modifier la dépense</h3>
+      <button class="modal-close" onclick="closeModal('modalEditSortie')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="ms_date">
+        </div>
+        <div class="form-group wide">
+          <label>Désignation</label>
+          <input type="text" id="ms_desig">
+        </div>
+        <div class="form-group">
+          <label>Catégorie</label>
+          <select id="ms_cat">
+            <option value="Salaire">🧹 Salaire (Gnima)</option>
+            <option value="Internet">📶 Internet / Wifi</option>
+            <option value="Électricité">💡 Électricité</option>
+            <option value="Eau">💧 Eau</option>
+            <option value="Gaz">🔥 Gaz</option>
+            <option value="Travaux">🔧 Travaux / Plomberie</option>
+            <option value="Équipement">📺 Équipement</option>
+            <option value="Ménage">🧽 Ménage / Divers</option>
+            <option value="Transfert">💸 Transfert M. Emmanuel</option>
+            <option value="Voiture">🚗 Voiture</option>
+            <option value="Amende">🚔 Amende / Police</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Logement concerné</label>
+          <select id="ms_log">
+            <option value="Commun">Commun (tous)</option>
+            <option value="RDC">RDC</option>
+            <option value="1er Étage">1er Étage</option>
+            <option value="2ème Étage">2ème Étage</option>
+            <option value="3ème Étage">3ème Étage</option>
+            <option value="M. Emmanuel">M. Emmanuel</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prix unitaire (FCFA)</label>
+          <input type="number" id="ms_pu" min="0" oninput="updateMsPreview()">
+        </div>
+        <div class="form-group">
+          <label>Quantité</label>
+          <input type="number" id="ms_qte" min="1" value="1" oninput="updateMsPreview()">
+        </div>
+        <div class="form-group">
+          <label>Frais Wave/Fees</label>
+          <input type="number" id="ms_wave" min="0" oninput="updateMsPreview()">
+        </div>
+        <div class="form-group wide">
+          <label>Notes</label>
+          <textarea id="ms_notes" rows="3" style="width:100%"></textarea>
+        </div>
+        <div class="form-group wide">
+          <label>Reçu actuel</label>
+          <div id="ms_receipt_current" style="font-size:.9rem;color:#333;min-height:32px">—</div>
+        </div>
+        <div class="form-group wide">
+          <label>Remplacer le reçu</label>
+          <input type="file" id="ms_receipt" accept="image/*,.pdf">
+        </div>
+      </div>
+      <div style="background:#e8f8f5;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#1A5C38;margin-top:4px">
+        💡 <b>Total calculé :</b> <span id="ms_preview_total" style="font-weight:700">—</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="saveEditSortie()">💾 Enregistrer les modifications</button>
+      <button class="btn btn-outline" onclick="closeModal('modalEditSortie')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">✅ Enregistré !</div>
+
+<script>
+// ════════════════════════════════════════════
+// DONNÉES INITIALES (historique complet)
+// ════════════════════════════════════════════
+const INITIAL_ENTREES = [
+  {id:1,date:"2025-02-05",desig:"Séjour (4 nuits)",log:"RDC",plat:"Direct",de:"2025-02-05",ds:"2025-02-09",nbj:4,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:2,date:"2025-02-09",desig:"Séjour (1 nuit)",log:"RDC",plat:"Direct",de:"2025-02-09",ds:"2025-02-10",nbj:1,pj:19000,pm:null,comm:null,chg:null,notes:""},
+  {id:3,date:"2025-02-15",desig:"Séjour (2 nuits)",log:"RDC",plat:"Direct",de:"2025-02-15",ds:"2025-02-17",nbj:2,pj:15000,pm:null,comm:null,chg:null,notes:""},
+  {id:4,date:"2025-02-18",desig:"Séjour (2 nuits)",log:"RDC",plat:"Direct",de:"2025-02-18",ds:"2025-02-20",nbj:2,pj:15000,pm:null,comm:null,chg:null,notes:""},
+  {id:5,date:"2025-02-20",desig:"Séjour (1 nuit)",log:"RDC",plat:"Direct",de:"2025-02-20",ds:"2025-02-21",nbj:1,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:6,date:"2025-02-22",desig:"Séjour (6 nuits)",log:"RDC",plat:"Direct",de:"2025-02-22",ds:"2025-02-28",nbj:6,pj:15000,pm:null,comm:null,chg:null,notes:""},
+  {id:7,date:"2025-04-19",desig:"Laurent — 1 mois complet",log:"RDC",plat:"Direct",de:"2025-04-19",ds:"2025-05-19",nbj:30,pj:null,pm:250000,comm:25000,chg:null,notes:"1 mois RDC"},
+  {id:8,date:"2025-05-05",desig:"Séjour (1 nuit)",log:"RDC",plat:"Direct",de:"2025-05-05",ds:"2025-05-06",nbj:1,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:9,date:"2025-05-22",desig:"Séjour (1 nuit)",log:"RDC",plat:"Direct",de:"2025-05-22",ds:"2025-05-23",nbj:1,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:10,date:"2025-05-23",desig:"Séjour Booking (1 nuit)",log:"RDC",plat:"Booking",de:"2025-05-23",ds:"2025-05-24",nbj:1,pj:22000,pm:null,comm:4000,chg:null,notes:""},
+  {id:11,date:"2025-06-02",desig:"Client Béranger (1 nuit)",log:"RDC",plat:"Commission",de:"2025-06-02",ds:"2025-06-03",nbj:1,pj:25000,pm:null,comm:4000,chg:null,notes:"Commission 4 000"},
+  {id:12,date:null,desig:"Airbnb 34 nuits",log:"RDC",plat:"Airbnb",de:"2025-06-03",ds:"2025-07-07",nbj:34,pj:null,pm:325000,comm:65000,chg:2500,notes:"Charge séjour 2 500"},
+  {id:13,date:"2026-02-04",desig:"Séjour 28 nuits",log:"RDC",plat:"Direct",de:"2026-02-04",ds:"2026-03-04",nbj:28,pj:null,pm:300000,comm:null,chg:10000,notes:"Charge élec. 10 000"},
+  {id:14,date:"2025-07-16",desig:"Séjour directe (2 nuits)",log:"RDC",plat:"Direct",de:"2025-07-16",ds:"2025-07-18",nbj:2,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:15,date:"2025-07-23",desig:"Séjour directe (3 nuits)",log:"RDC",plat:"Direct",de:"2025-07-23",ds:"2025-07-26",nbj:3,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:16,date:"2025-07-28",desig:"Séjour directe (3 nuits)",log:"RDC",plat:"Direct",de:"2025-07-28",ds:"2025-07-31",nbj:3,pj:17000,pm:null,comm:null,chg:null,notes:""},
+  {id:17,date:"2025-08-02",desig:"Séjour directe (1 nuit)",log:"RDC",plat:"Direct",de:"2025-08-02",ds:"2025-08-03",nbj:1,pj:19000,pm:null,comm:null,chg:null,notes:""},
+  {id:18,date:"2025-08-11",desig:"Séjour directe (4 nuits)",log:"RDC",plat:"Direct",de:"2025-08-11",ds:"2025-08-15",nbj:4,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:19,date:"2025-10-22",desig:"Séjour Booking (1 nuit)",log:"RDC",plat:"Booking",de:"2025-10-22",ds:"2025-10-23",nbj:1,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:20,date:"2025-11-01",desig:"Séjour Booking (1 nuit)",log:"RDC",plat:"Booking",de:"2025-11-01",ds:"2025-11-02",nbj:1,pj:21000,pm:null,comm:null,chg:null,notes:""},
+  {id:21,date:"2025-11-28",desig:"Séjour directe (6 nuits)",log:"RDC",plat:"Direct",de:"2025-11-28",ds:"2025-12-04",nbj:6,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:22,date:"2025-12-19",desig:"Séjour Booking (1 nuit)",log:"RDC",plat:"Booking",de:"2025-12-19",ds:"2025-12-20",nbj:1,pj:22000,pm:null,comm:null,chg:null,notes:""},
+  {id:23,date:"2026-04-17",desig:"Séjour Directe (1 nuit)",log:"RDC",plat:"Direct",de:"2026-04-17",ds:"2026-04-18",nbj:1,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  // 1er Étage
+  {id:24,date:"2025-02-09",desig:"Client Diallo (4 nuits)",log:"1er Étage",plat:"Airbnb",de:"2025-02-09",ds:"2025-02-13",nbj:4,pj:22000,pm:null,comm:16000,chg:null,notes:"Client de Diallo"},
+  {id:25,date:"2025-03-03",desig:"Séjour (2 nuits)",log:"1er Étage",plat:"Direct",de:"2025-03-03",ds:"2025-03-05",nbj:2,pj:17000,pm:null,comm:null,chg:null,notes:""},
+  {id:26,date:"2025-03-04",desig:"Séjour (1 nuit)",log:"1er Étage",plat:"Direct",de:"2025-03-04",ds:"2025-03-05",nbj:1,pj:17000,pm:null,comm:null,chg:null,notes:""},
+  {id:27,date:"2025-03-11",desig:"Séjour (1 nuit)",log:"1er Étage",plat:"Direct",de:"2025-03-11",ds:"2025-03-12",nbj:1,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:28,date:"2025-04-08",desig:"Séjour Booking (3 nuits)",log:"1er Étage",plat:"Booking",de:"2025-04-08",ds:"2025-04-11",nbj:3,pj:17100,pm:null,comm:7695,chg:null,notes:""},
+  {id:29,date:"2025-04-21",desig:"Séjour Airbnb (1 nuit)",log:"1er Étage",plat:"Airbnb",de:"2025-04-21",ds:"2025-04-22",nbj:1,pj:16000,pm:null,comm:null,chg:null,notes:""},
+  {id:30,date:"2025-05-23",desig:"Séjour Booking (1 nuit)",log:"1er Étage",plat:"Booking",de:"2025-05-23",ds:"2025-05-24",nbj:1,pj:22000,pm:null,comm:4000,chg:null,notes:""},
+  {id:31,date:"2025-06-01",desig:"Séjour (2 nuits)",log:"1er Étage",plat:"Direct",de:"2025-06-01",ds:"2025-06-03",nbj:2,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:32,date:"2025-06-03",desig:"Séjour mensuel (30 nuits)",log:"1er Étage",plat:"Direct",de:"2025-06-03",ds:"2025-07-03",nbj:30,pj:null,pm:300000,comm:null,chg:null,notes:""},
+  {id:33,date:"2025-07-10",desig:"Client Philippe (3 nuits)",log:"1er Étage",plat:"Commission",de:"2025-07-10",ds:"2025-07-13",nbj:3,pj:19000,pm:null,comm:6000,chg:null,notes:""},
+  {id:34,date:"2025-07-11",desig:"Client Béranger (3 nuits)",log:"1er Étage",plat:"Commission",de:"2025-07-10",ds:"2025-07-13",nbj:3,pj:20000,pm:null,comm:6000,chg:null,notes:""},
+  {id:35,date:"2025-07-21",desig:"Client Nestor (1 nuit)",log:"1er Étage",plat:"Commission",de:"2025-07-21",ds:"2025-07-22",nbj:1,pj:20000,pm:null,comm:6000,chg:null,notes:""},
+  {id:36,date:"2025-11-11",desig:"Client Philippe (4 nuits)",log:"1er Étage",plat:"Direct",de:"2025-11-11",ds:"2025-11-15",nbj:4,pj:20000,pm:null,comm:null,chg:null,notes:""},
+  {id:37,date:"2025-12-12",desig:"Vieux Diallo (5 nuits)",log:"1er Étage",plat:"Direct",de:"2025-12-12",ds:"2025-12-17",nbj:5,pj:18000,pm:null,comm:null,chg:null,notes:""},
+  {id:38,date:"2025-12-20",desig:"Séjour directe (1 nuit)",log:"1er Étage",plat:"Direct",de:"2025-12-20",ds:"2025-12-21",nbj:1,pj:20000,pm:null,comm:3400,chg:null,notes:""},
+  {id:39,date:null,desig:"Client Béranger (9 nuits)",log:"1er Étage",plat:"Commission",de:"2026-05-14",ds:"2026-05-23",nbj:9,pj:19000,pm:null,comm:18000,chg:null,notes:""},
+  {id:40,date:"2026-05-15",desig:"✅ Reçu ANTOINETTE (Wave)",log:"1er Étage",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:285000,comm:null,chg:null,notes:"Montant reçu d'Antoinette"},
+  {id:41,date:"2025-09-22",desig:"Mr Emmanuel fils Antoinette (9 nuits)",log:"1er Étage",plat:"Direct",de:"2025-09-22",ds:null,nbj:9,pj:20000,pm:null,comm:null,chg:null,notes:"Fils d'Antoinette"},
+  // 2ème Étage Simon
+  {id:42,date:"2025-04-22",desig:"Séjour (4 nuits)",log:"2ème Étage",plat:"Direct",de:"2025-04-22",ds:"2025-04-26",nbj:4,pj:16000,pm:null,comm:null,chg:null,notes:""},
+  {id:43,date:"2025-05-01",desig:"Simon — Loyer Mai 2025",log:"2ème Étage",plat:"Simon",de:"2025-05-01",ds:"2025-05-31",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:"1 mois avance"},
+  {id:44,date:"2025-05-02",desig:"Simon — Caution",log:"2ème Étage",plat:"Simon",de:null,ds:null,nbj:null,pj:null,pm:250000,comm:null,chg:null,notes:"Caution 2ème étage"},
+  {id:45,date:"2025-06-06",desig:"Simon — Loyer Juin 2025",log:"2ème Étage",plat:"Simon",de:"2025-06-06",ds:"2025-07-05",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:46,date:"2025-07-05",desig:"Simon — Loyer Juillet 2025",log:"2ème Étage",plat:"Simon",de:"2025-07-05",ds:"2025-08-04",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:47,date:null,desig:"Simon — Loyer Août 2025",log:"2ème Étage",plat:"Simon",de:null,ds:null,nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:48,date:"2025-09-05",desig:"Simon — Loyer Septembre 2025",log:"2ème Étage",plat:"Simon",de:"2025-09-05",ds:"2025-10-04",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:49,date:null,desig:"Séjour Booking mensuel",log:"2ème Étage",plat:"Booking",de:null,ds:null,nbj:null,pj:null,pm:400000,comm:null,chg:null,notes:"Commission incluse"},
+  {id:50,date:"2025-10-07",desig:"Simon — Loyer Octobre 2025",log:"2ème Étage",plat:"Simon",de:"2025-10-07",ds:"2025-11-05",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:51,date:"2025-11-06",desig:"Simon — Loyer Novembre 2025",log:"2ème Étage",plat:"Simon",de:"2025-11-06",ds:"2025-12-05",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:52,date:"2025-12-06",desig:"Simon — Loyer Décembre 2025",log:"2ème Étage",plat:"Simon",de:"2025-12-06",ds:"2026-01-05",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:53,date:"2026-01-06",desig:"Simon — Loyer Janvier 2026",log:"2ème Étage",plat:"Simon",de:"2026-01-06",ds:"2026-02-05",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:54,date:"2026-02-09",desig:"Simon — Loyer Février 2026",log:"2ème Étage",plat:"Simon",de:"2026-02-09",ds:"2026-03-08",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:55,date:"2026-03-05",desig:"Simon — Loyer Mars 2026",log:"2ème Étage",plat:"Simon",de:"2026-03-05",ds:"2026-04-04",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  {id:56,date:"2026-04-10",desig:"Simon — Loyer Avril 2026",log:"2ème Étage",plat:"Simon",de:"2026-04-10",ds:"2026-05-09",nbj:30,pj:null,pm:250000,comm:null,chg:null,notes:""},
+  // Sicap Mbao
+  {id:57,date:"2025-05-10",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:58,date:null,desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:59,date:"2025-07-01",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:60,date:"2025-08-05",desig:"Reçu Orange Money — M. Emmanuel",log:"Sicap Mbao",plat:"Orange",de:null,ds:null,nbj:null,pj:null,pm:150000,comm:null,chg:null,notes:""},
+  {id:61,date:"2025-10-07",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:62,date:"2026-01-08",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:150000,comm:null,chg:null,notes:""},
+  {id:63,date:"2026-02-08",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:64,date:"2026-03-05",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:148515,comm:null,chg:null,notes:""},
+  {id:65,date:"2026-04-01",desig:"Reçu Wave — M. Emmanuel",log:"Sicap Mbao",plat:"Wave",de:null,ds:null,nbj:null,pj:null,pm:150000,comm:null,chg:null,notes:""},
+];
+
+const INITIAL_SORTIES = [
+  // Gnima
+  {id:1,date:"2025-02-05",desig:"Salaire Gnima — Janvier 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:2,date:"2025-03-08",desig:"Salaire Gnima — Février 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:3,date:"2025-04-09",desig:"Salaire Gnima — Mars 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  {id:4,date:"2025-05-04",desig:"Salaire Gnima — Avril 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  {id:5,date:"2025-06-05",desig:"Salaire Gnima — Mai 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  {id:6,date:"2025-07-08",desig:"Salaire Gnima — Juin 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:7,date:"2025-08-02",desig:"Salaire Gnima — Juillet 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:8,date:"2025-08-05",desig:"Salaire Gnima — Août 2025",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  {id:9,date:"2025-11-03",desig:"Salaire Gnima — Sept. & Oct. 2025 (x2)",cat:"Salaire",log:"Commun",pu:60000,qte:2,wave:null,notes:"2 mois regroupés"},
+  {id:10,date:"2025-11-14",desig:"Salaire Gnima — Nov. & Déc. 2025 (x2)",cat:"Salaire",log:"Commun",pu:60000,qte:2,wave:600,notes:"2 mois regroupés"},
+  {id:11,date:"2026-02-06",desig:"Salaire Gnima — Janvier 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:12,date:"2026-02-06",desig:"Salaire Gnima — Février 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:13,date:"2026-02-06",desig:"Salaire Gnima — Mars 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:14,date:"2026-04-04",desig:"Salaire Gnima — Avril 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:600,notes:""},
+  {id:15,date:null,desig:"Salaire Gnima — Mai 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  {id:16,date:"2026-05-23",desig:"Salaire Gnima — Juin 2026",cat:"Salaire",log:"Commun",pu:60000,qte:1,wave:null,notes:""},
+  // Internet CORRIGÉ : 1 ligne par mois, pas de frais wave regroupés
+  {id:17,date:"2025-02-23",desig:"Internet Wifi — Janvier 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:18,date:"2025-03-22",desig:"Internet Wifi — Février 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:19,date:"2025-04-10",desig:"Internet Wifi — Mars 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:20,date:"2025-05-24",desig:"Internet Wifi — Avril 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:21,date:"2025-07-27",desig:"Internet Wifi — Mai 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:22,date:"2025-07-27",desig:"Internet Wifi — Juin 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:23,date:"2025-08-03",desig:"Internet Wifi — Juillet 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:24,date:"2025-08-10",desig:"Internet Wifi — Août 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:25,date:"2025-08-10",desig:"Internet Wifi — Septembre 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:26,date:"2025-11-06",desig:"Internet Wifi — Octobre 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:27,date:"2025-11-13",desig:"Internet Wifi — Novembre 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:28,date:"2025-11-13",desig:"Internet Wifi — Décembre 2025",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:29,date:"2025-11-17",desig:"Internet Wifi — Janvier 2026",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:30,date:"2026-03-16",desig:"Internet Wifi — Février 2026",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:31,date:"2026-04-05",desig:"Internet Wifi — Mars 2026",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  {id:32,date:"2026-05-02",desig:"Internet Wifi — Avril 2026",cat:"Internet",log:"Commun",pu:14900,qte:1,wave:null,notes:""},
+  // Elec/Eau
+  {id:33,date:"2025-02-24",desig:"Électricité — 2ème étage",cat:"Électricité",log:"2ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:34,date:"2025-02-25",desig:"Électricité — RDC",cat:"Électricité",log:"RDC",pu:2000,qte:1,wave:null,notes:""},
+  {id:35,date:"2025-02-26",desig:"Facture eau",cat:"Eau",log:"Commun",pu:45252,qte:1,wave:null,notes:""},
+  {id:36,date:"2025-07-28",desig:"Électricité urgence RDC & 1er ét.",cat:"Électricité",log:"RDC/1er Ét.",pu:4000,qte:1,wave:null,notes:""},
+  {id:37,date:"2025-08-06",desig:"Facture eau",cat:"Eau",log:"Commun",pu:4941,qte:1,wave:null,notes:""},
+  {id:38,date:"2025-06-20",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:39,date:"2025-07-21",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:40,date:"2025-08-04",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:41,date:"2025-08-11",desig:"Woyofall — 3ème étage (x2)",cat:"Électricité",log:"3ème Étage",pu:5000,qte:2,wave:null,notes:""},
+  {id:42,date:"2025-11-15",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:43,date:"2025-11-16",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:44,date:"2026-01-26",desig:"Woyofall — 3ème étage (x2)",cat:"Électricité",log:"3ème Étage",pu:5000,qte:2,wave:null,notes:""},
+  {id:45,date:"2026-02-20",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:46,date:"2026-03-16",desig:"Woyofall — 3ème étage",cat:"Électricité",log:"3ème Étage",pu:5000,qte:1,wave:null,notes:""},
+  {id:47,date:"2026-04-06",desig:"Woyofall",cat:"Électricité",log:"Commun",pu:10000,qte:1,wave:null,notes:""},
+  {id:48,date:"2026-04-30",desig:"Facture eau",cat:"Eau",log:"Commun",pu:19000,qte:1,wave:null,notes:""},
+  {id:49,date:"2026-05-14",desig:"Transfert pour eau",cat:"Eau",log:"Commun",pu:20000,qte:1,wave:null,notes:""},
+  // Gaz
+  {id:50,date:"2025-02-13",desig:"Recharge gaz",cat:"Gaz",log:"Commun",pu:3000,qte:1,wave:30,notes:""},
+  {id:51,date:"2025-04-17",desig:"Cable gaz RDC",cat:"Gaz",log:"RDC",pu:1500,qte:1,wave:null,notes:""},
+  {id:52,date:"2025-04-18",desig:"Changement gaz RDC",cat:"Gaz",log:"RDC",pu:6500,qte:1,wave:65,notes:""},
+  {id:53,date:"2025-06-23",desig:"Recharge gaz — 1er étage",cat:"Gaz",log:"1er Étage",pu:6500,qte:1,wave:null,notes:""},
+  {id:54,date:"2026-05-14",desig:"Recharge gaz — RDC",cat:"Gaz",log:"RDC",pu:6500,qte:1,wave:null,notes:""},
+  // Travaux
+  {id:55,date:"2025-02-14",desig:"Achat poignet fenêtre RDC",cat:"Travaux",log:"RDC",pu:1000,qte:1,wave:null,notes:""},
+  {id:56,date:"2025-02-16",desig:"Chauffe-eau Astech + livraison",cat:"Travaux",log:"2ème Étage",pu:65000,qte:1,wave:3630,notes:""},
+  {id:57,date:"2025-02-19",desig:"Mécanisme WC RDC",cat:"Travaux",log:"RDC",pu:12000,qte:1,wave:120,notes:""},
+  {id:58,date:"2025-02-21",desig:"Main d'œuvre plombier (chauffe-eau)",cat:"Travaux",log:"2ème Étage",pu:15000,qte:1,wave:150,notes:""},
+  {id:59,date:"2025-02-22",desig:"Matériel plombier (chauffe-eau)",cat:"Travaux",log:"2ème Étage",pu:3500,qte:1,wave:35,notes:""},
+  {id:60,date:"2025-04-16",desig:"Plombier — fuite 2ème ét. & RDC",cat:"Travaux",log:"Commun",pu:6000,qte:1,wave:null,notes:""},
+  {id:61,date:"2025-04-17",desig:"Panneaux 6mm (menuisier)",cat:"Travaux",log:"RDC",pu:15000,qte:2,wave:null,notes:""},
+  {id:62,date:"2025-04-18",desig:"Porte RDC main d'œuvre menuisier",cat:"Travaux",log:"RDC",pu:20000,qte:1,wave:200,notes:""},
+  {id:63,date:"2025-06-04",desig:"Plombier évier RDC",cat:"Travaux",log:"RDC",pu:12000,qte:1,wave:null,notes:""},
+  {id:64,date:"2025-07-29",desig:"Réparation porte patio arrière RDC",cat:"Travaux",log:"RDC",pu:15000,qte:1,wave:null,notes:""},
+  {id:65,date:"2025-08-07",desig:"Robinet évier",cat:"Travaux",log:"Commun",pu:22500,qte:1,wave:null,notes:""},
+  {id:66,date:"2025-08-08",desig:"Plombier main d'œuvre",cat:"Travaux",log:"Commun",pu:8000,qte:1,wave:null,notes:""},
+  {id:67,date:"2025-11-05",desig:"Travaux rénovation RDC",cat:"Travaux",log:"RDC",pu:642000,qte:1,wave:null,notes:"Voir feuille Rénovation"},
+  {id:68,date:"2025-11-07",desig:"Réparation plomberie Simon",cat:"Travaux",log:"2ème Étage",pu:10000,qte:1,wave:null,notes:""},
+  {id:69,date:"2025-11-08",desig:"Réparation porte Simon",cat:"Travaux",log:"2ème Étage",pu:12000,qte:1,wave:null,notes:""},
+  {id:70,date:"2025-11-09",desig:"Réparation pompe suppresseur",cat:"Travaux",log:"Commun",pu:22000,qte:1,wave:null,notes:""},
+  {id:71,date:"2025-11-04",desig:"Achat TV 43 pouces — 1er étage",cat:"Équipement",log:"1er Étage",pu:101000,qte:1,wave:6000,notes:""},
+  {id:72,date:"2025-11-16",desig:"Achat micro-ondes Sharp RDC",cat:"Équipement",log:"RDC",pu:71000,qte:1,wave:null,notes:""},
+  {id:73,date:"2026-03-19",desig:"Réparation frigo",cat:"Travaux",log:"Commun",pu:28000,qte:1,wave:280,notes:""},
+  {id:74,date:"2026-04-30",desig:"Réparation chauffe-eau RDC",cat:"Travaux",log:"RDC",pu:20000,qte:1,wave:null,notes:""},
+  {id:75,date:"2026-05-02",desig:"Plombier flexible chauffe-eau 2ème ét.",cat:"Travaux",log:"2ème Étage",pu:4000,qte:1,wave:null,notes:""},
+  // Ménage
+  {id:76,date:"2025-03-05",desig:"Ménage intérimaire (Gnima absente)",cat:"Ménage",log:"Commun",pu:5000,qte:1,wave:50,notes:""},
+  {id:77,date:"2025-03-21",desig:"Produits ménage (transfert Gnima)",cat:"Ménage",log:"Commun",pu:2000,qte:1,wave:20,notes:""},
+  {id:78,date:"2026-01-26",desig:"Produit nettoyage",cat:"Ménage",log:"Commun",pu:5000,qte:1,wave:null,notes:""},
+  {id:79,date:"2026-04-01",desig:"Nettoyage fosse",cat:"Ménage",log:"Commun",pu:5000,qte:1,wave:50,notes:""},
+  {id:80,date:"2026-04-03",desig:"Frais transport Gnima",cat:"Ménage",log:"Commun",pu:6000,qte:1,wave:60,notes:""},
+  // Transferts
+  {id:81,date:"2025-03-12",desig:"Transfert à Dabo (fibrome)",cat:"Transfert",log:"M. Emmanuel",pu:50000,qte:1,wave:500,notes:""},
+  {id:82,date:"2025-03-13",desig:"Ngalax + taxi",cat:"Transfert",log:"M. Emmanuel",pu:20200,qte:1,wave:10100,notes:""},
+  {id:83,date:"2025-08-09",desig:"Transfert M. Edmon Fall",cat:"Transfert",log:"M. Emmanuel",pu:350000,qte:1,wave:3500,notes:""},
+  {id:84,date:"2025-11-10",desig:"Transfert M. Emma",cat:"Transfert",log:"M. Emmanuel",pu:20000,qte:1,wave:200,notes:""},
+  {id:85,date:"2025-11-11",desig:"Crédit téléphone M. Emma",cat:"Transfert",log:"M. Emmanuel",pu:5000,qte:1,wave:null,notes:""},
+  {id:86,date:"2025-11-12",desig:"Transfert à Kao",cat:"Transfert",log:"M. Emmanuel",pu:10000,qte:1,wave:100,notes:""},
+  {id:87,date:"2026-04-01",desig:"Transfert à Dabo",cat:"Transfert",log:"M. Emmanuel",pu:20000,qte:1,wave:null,notes:""},
+  {id:88,date:"2026-05-07",desig:"Rendue 5 500 € (envoi Henry)",cat:"Transfert",log:"M. Emmanuel",pu:3602500,qte:1,wave:null,notes:""},
+  {id:89,date:"2026-05-11",desig:"Transfert vers Ka",cat:"Transfert",log:"M. Emmanuel",pu:300000,qte:1,wave:null,notes:""},
+  {id:90,date:"2026-05-12",desig:"Transfert vers Ndjouga (quincaillerie)",cat:"Transfert",log:"M. Emmanuel",pu:240000,qte:1,wave:null,notes:""},
+  {id:91,date:"2026-05-13",desig:"Transfert à Amath Géomètre",cat:"Transfert",log:"M. Emmanuel",pu:70000,qte:1,wave:null,notes:""},
+  {id:92,date:"2026-05-13",desig:"Transfert à Ndjouga",cat:"Transfert",log:"M. Emmanuel",pu:6600,qte:1,wave:null,notes:""},
+  {id:93,date:"2026-05-13",desig:"Transfert à Ndjouga",cat:"Transfert",log:"M. Emmanuel",pu:4500,qte:1,wave:null,notes:""},
+  {id:94,date:"2026-05-14",desig:"Transfert à Julien",cat:"Transfert",log:"M. Emmanuel",pu:12000,qte:1,wave:120,notes:""},
+  {id:95,date:"2026-05-17",desig:"Transfert à Julien",cat:"Transfert",log:"M. Emmanuel",pu:96000,qte:1,wave:960,notes:""},
+  {id:96,date:"2026-05-17",desig:"Transfert 70 703 77 79",cat:"Transfert",log:"M. Emmanuel",pu:16000,qte:1,wave:160,notes:""},
+  {id:97,date:"2026-05-24",desig:"Transfert à Julien",cat:"Transfert",log:"M. Emmanuel",pu:90900,qte:1,wave:null,notes:""},
+  // Voiture
+  {id:98,date:null,desig:"Aller-retour intervention voiture 1",cat:"Voiture",log:"M. Emmanuel",pu:2500,qte:2,wave:null,notes:""},
+  {id:99,date:null,desig:"Location batterie 1",cat:"Voiture",log:"M. Emmanuel",pu:3500,qte:1,wave:null,notes:""},
+  {id:100,date:null,desig:"Aller-retour intervention voiture 2",cat:"Voiture",log:"M. Emmanuel",pu:2500,qte:2,wave:null,notes:""},
+  {id:101,date:null,desig:"Location batterie 2",cat:"Voiture",log:"M. Emmanuel",pu:3000,qte:1,wave:null,notes:""},
+  {id:102,date:null,desig:"Intervention via Jean",cat:"Voiture",log:"M. Emmanuel",pu:9000,qte:1,wave:null,notes:""},
+  {id:103,date:null,desig:"Intervention personnelle",cat:"Voiture",log:"M. Emmanuel",pu:10000,qte:1,wave:null,notes:"batterie+essence+pneu"},
+  {id:104,date:"2026-05-25",desig:"Taxi pneu 1 (Yango)",cat:"Voiture",log:"M. Emmanuel",pu:2200,qte:1,wave:220,notes:""},
+  {id:105,date:null,desig:"Taxi pneu 2 (Joe)",cat:"Voiture",log:"M. Emmanuel",pu:5000,qte:1,wave:null,notes:""},
+  {id:106,date:null,desig:"Intervention voiture (aller-retour+batterie+track)",cat:"Voiture",log:"M. Emmanuel",pu:12000,qte:1,wave:null,notes:""},
+  // Amende
+  {id:107,date:"2026-03-06",desig:"Police touristique",cat:"Amende",log:"Commun",pu:35000,qte:1,wave:null,notes:""},
+];
+
+// ════════════════ STATE ════════════════
+
+
+
+let nextEid = 200, nextSid = 200;
+let entrees = [], sorties = [];
+let stockMaison = [], stockChantier = [], auditRows = [];
+
+function getNextId(rows, fallback){
+  const ids = rows.map(row => Number(row.id)).filter(Number.isFinite);
+  return ids.length ? Math.max(...ids) + 1 : fallback;
+}
+
+async function loadData() {
+  try {
+    const se = localStorage.getItem('emm_entrees');
+    const ss = localStorage.getItem('emm_sorties');
+    if(se) { entrees = JSON.parse(se); nextEid = getNextId(entrees, 200); }
+    else { entrees = INITIAL_ENTREES.map(e=>({...e})); nextEid=200; }
+    if(ss) { sorties = JSON.parse(ss); nextSid = getNextId(sorties, 200); }
+    else { sorties = INITIAL_SORTIES.map(s=>({...s})); nextSid=200; }
+    sortEntreesByDate();
+    sortSortiesByDate();
+    save();
+    if(FIREBASE_ENABLED && firebaseUser){
+      const [remoteEntrees,remoteSorties] = await Promise.all([
+        readRemoteCollection('entrees'), readRemoteCollection('sorties')
+      ]);
+      if(remoteEntrees?.length){
+        entrees=remoteEntrees; nextEid=getNextId(entrees,200);
+      } else {
+        await writeRemoteCollection('entrees',entrees);
+      }
+      if(remoteSorties?.length){
+        sorties=remoteSorties; nextSid=getNextId(sorties,200);
+      } else {
+        await writeRemoteCollection('sorties',sorties);
+      }
+      sortEntreesByDate(); sortSortiesByDate(); save();
+      document.getElementById('lastSaved').textContent='☁️ Synchronisé Firebase';
+    }
+  } catch(e) {
+    entrees = INITIAL_ENTREES.map(e=>({...e}));
+    sorties = INITIAL_SORTIES.map(s=>({...s}));
+    sortEntreesByDate();
+    sortSortiesByDate();
+  }
+}
+
+function save() {
+  try{
+    localStorage.setItem('emm_entrees', JSON.stringify(entrees));
+    localStorage.setItem('emm_sorties', JSON.stringify(sorties));
+    document.getElementById('lastSaved').textContent = '💾 Sauvegardé ' + new Date().toLocaleTimeString('fr-FR');
+    return true;
+  }catch(e){
+    console.error('Erreur de sauvegarde locale', e);
+    showToast('⚠️ Impossible de sauvegarder les données', true);
+    return false;
+  }
+}
+
+function saveAndRefresh(){
+  save();
+  renderSynthese();
+  renderEntrees();
+  renderSorties();
+  renderExport();
+}
+
+
+// ════════════════ CALCULS ════════════════
+function calcBrut(e){ return e.pm || (e.nbj && e.pj ? e.nbj*e.pj : 0); }
+function calcNet(e){ return calcBrut(e) - (e.comm||0) - (e.chg||0); }
+function calcTotal(s){ return (s.pu||0)*(s.qte||1) + (s.wave||0); }
+
+function totalEntreesLog(log){ return entrees.filter(e=>e.log===log).reduce((a,e)=>a+calcNet(e),0); }
+function totalEntrees(){ return entrees.reduce((a,e)=>a+calcNet(e),0); }
+function totalSorties(){ return sorties.reduce((a,s)=>a+calcTotal(s),0); }
+function totalSortesCat(cat){ return sorties.filter(s=>s.cat===cat).reduce((a,s)=>a+calcTotal(s),0); }
+
+function sortEntreesByDate(){
+  entrees.sort((a,b)=>{
+    if(a.date && b.date) return a.date.localeCompare(b.date);
+    if(a.date) return -1;
+    if(b.date) return 1;
+    return 0;
+  });
+}
+
+function sortSortiesByDate(){
+  sorties.sort((a,b)=>{
+    if(a.date && b.date) return a.date.localeCompare(b.date);
+    if(a.date) return -1;
+    if(b.date) return 1;
+    return 0;
+  });
+}
+
+// ════════════════ FORMAT ════════════════
+function fcfa(n){ return n==null?'—': Math.round(n).toLocaleString('fr-FR')+' FCFA'; }
+function fdate(d){ if(!d) return '—'; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function renderReceiptLink(receipt){
+  if(!receipt || !receipt.data) return '—';
+  const name = receipt.name || 'Reçu';
+  const icon = receipt.type && receipt.type.startsWith('image/') ? '🖼️' : '📄';
+  return `<a href="${receipt.data}" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600">${icon} ${name}</a>`;
+}
+function getReceiptFileData(inputId){
+  const input = document.getElementById(inputId);
+  if(!input || !input.files || !input.files[0]) return Promise.resolve(null);
+  const file = input.files[0];
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => resolve({name:file.name,type:file.type,data:e.target.result});
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+function logBadge(l){
+  const m={'RDC':'badge-rdc','1er Étage':'badge-1er','2ème Étage':'badge-2e','Sicap Mbao':'badge-mbao'};
+  return `<span class="badge ${m[l]||'badge-rdc'}">${l}</span>`;
+}
+function catBadge(c){
+  const m={'Salaire':'badge-salaire','Internet':'badge-internet','Électricité':'badge-elec',
+           'Eau':'badge-internet','Gaz':'badge-elec','Travaux':'badge-travaux','Équipement':'badge-travaux',
+           'Ménage':'badge-internet','Transfert':'badge-transfert','Voiture':'badge-transfert','Amende':'badge-transfert'};
+  return `<span class="badge ${m[c]||'badge-salaire'}">${c}</span>`;
+}
+
+// ════════════════ TABS ════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='synthese') renderSynthese();
+  if(name==='entrees') renderEntrees();
+  if(name==='sorties') renderSorties();
+  if(name==='exporter') renderExport();
+  if(name==='audit') renderAudit();
+}
+
+// ════════════════ SYNTHÈSE ════════════════
+function renderSynthese(){
+  const te=totalEntrees(), ts=totalSorties(), solde=te-ts;
+  // KPIs
+  document.getElementById('kpiRow').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Total Entrées (Net)</div><div class="kpi-val">${fcfa(te)}</div></div>
+    <div class="kpi red"><div class="kpi-label">Total Sorties</div><div class="kpi-val">${fcfa(ts)}</div></div>
+    <div class="kpi ${solde>=0?'green':'red'}"><div class="kpi-label">Solde Net</div><div class="kpi-val">${fcfa(solde)}</div></div>
+    <div class="kpi gold"><div class="kpi-label">Nb entrées enregistrées</div><div class="kpi-val">${entrees.length}</div></div>
+  `;
+  // Entrées par log
+  const logs=['RDC','1er Étage','2ème Étage','Sicap Mbao'];
+  let he='';
+  for(const l of logs){
+    const t=totalEntreesLog(l);
+    he+=`<div class="synth-row"><span class="lbl">${logBadge(l)}</span><span class="val green">${fcfa(t)}</span></div>`;
+  }
+  he+=`<div class="synth-total"><span class="lbl">TOTAL ENTRÉES</span><span class="val">${fcfa(te)}</span></div>`;
+  document.getElementById('synthEntrees').innerHTML=he;
+  // Sorties par cat
+  const cats=['Salaire','Internet','Électricité','Eau','Gaz','Travaux','Équipement','Ménage','Transfert','Voiture','Amende'];
+  let hs='';
+  for(const c of cats){
+    const t=totalSortesCat(c);
+    if(t>0) hs+=`<div class="synth-row"><span class="lbl">${catBadge(c)}</span><span class="val red">${fcfa(t)}</span></div>`;
+  }
+  hs+=`<div class="synth-total" style="background:var(--green)"><span class="lbl">TOTAL SORTIES</span><span class="val">${fcfa(ts)}</span></div>`;
+  document.getElementById('synthSorties').innerHTML=hs;
+  // Gnima
+  const tGnima=totalSortesCat('Salaire'), tNet=totalSortesCat('Internet');
+  const nbGnima=sorties.filter(s=>s.cat==='Salaire').length;
+  document.getElementById('synthGnima').innerHTML=`
+    <div class="synth-row"><span class="lbl">🧹 Total salaires Gnima versés</span><span class="val">${fcfa(tGnima)}</span></div>
+    <div class="synth-row"><span class="lbl">📅 Nb lignes salaire enregistrées</span><span class="val">${nbGnima} mois</span></div>
+    <div class="synth-row"><span class="lbl">💰 Salaire mensuel (fixe)</span><span class="val">60 000 FCFA</span></div>
+    <div class="synth-row"><span class="lbl">📶 Total Internet/Wifi payé</span><span class="val">${fcfa(tNet)}</span></div>
+    <div class="synth-row"><span class="lbl">📡 Abonnement mensuel Wifi</span><span class="val">14 900 FCFA</span></div>
+    <div class="synth-row"><span class="lbl">💵 Solde après caution Simon</span><span class="val ${solde-250000>=0?'green':'red'}">${fcfa(solde-250000)}</span></div>
+  `;
+}
+
+// ════════════════ ENTRÉES ════════════════
+function renderEntrees(){
+  sortEntreesByDate();
+  const flt=document.getElementById('filterLog').value;
+  const search=(document.getElementById('searchEntrees')?.value||'').toLowerCase().trim();
+  let data=flt?entrees.filter(e=>e.log===flt):entrees;
+  data = filterByRole(data, true); // filtre par rôle
+  if(search){
+    data=data.filter(e=>{
+      const hay=[e.date||'',e.desig||'',e.log||'',e.plat||'',e.de||'',e.ds||'',e.notes||'',
+        String(e.pj||''),String(e.pm||''),String(e.comm||''),String(e.chg||''),String(e.nbj||'')].join(' ').toLowerCase();
+      return hay.includes(search);
+    });
+  }
+  document.getElementById('countEntrees').textContent=data.length+' ligne(s)';
+  let html='';
+  if(!data.length){html='<tr><td colspan="13" class="no-data">'+(search?'Aucun résultat pour "'+search+'"':'Aucune entrée')+'</td></tr>';}
+  else{
+    const byLog={};
+    for(const e of data){ (byLog[e.log]=byLog[e.log]||[]).push(e); }
+    for(const [log,rows] of Object.entries(byLog)){
+      html+=`<tr class="sec-row"><td colspan="13">📍 ${log} — ${rows.length} ligne(s) · Total net : ${fcfa(rows.reduce((a,e)=>a+calcNet(e),0))}</td></tr>`;
+      for(const e of rows){
+        const brut=calcBrut(e), net=calcNet(e);
+        html+=`<tr id="erow-${e.id}">
+          <td>${fdate(e.date)}</td>
+          <td><b>${e.desig||'—'}</b></td>
+          <td>${logBadge(e.log)}</td>
+          <td><small>${e.plat||'—'}</small></td>
+          <td>${fdate(e.de)}</td>
+          <td>${fdate(e.ds)}</td>
+          <td style="text-align:center">${e.nbj||'—'}</td>
+          <td class="amount">${fcfa(brut)}</td>
+          <td class="amount" style="color:#e67e22">${e.comm?fcfa(e.comm):'—'}</td>
+          <td class="amount">${fcfa(net)}</td>
+          <td>${renderReceiptLink(e.receipt)}</td>
+          <td><small style="color:#888;max-width:160px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(e.notes||'').replace(/"/g,'&quot;')}">${e.notes||'—'}</small></td>
+          <td>
+            <div class="actions">
+              ${(currentUser?.role==='admin'||currentUser?.role==='proprio'||currentUser?.role==='gestionnaire')?`<button class="btn btn-edit btn-sm" onclick="openEditEntree(${e.id})" title="Modifier">✏️</button>`:''}
+              ${(currentUser?.role==='admin'||currentUser?.role==='proprio')?`<button class="btn btn-danger btn-sm" onclick="delEntree(${e.id})" title="Supprimer">✕</button>`:''}
+              ${currentUser?.role==='locataire'?'<span style="font-size:.75rem;color:#aaa">Lecture seule</span>':''}
+            </div>
+          </td>
+        </tr>`;
+      }
+    }
+  }
+  document.getElementById('tbodyEntrees').innerHTML=html;
+}
+
+async function addEntree(){
+  const de=document.getElementById('e_de').value, ds=document.getElementById('e_ds').value;
+  let nbj=parseInt(document.getElementById('e_nbj').value)||null;
+  if(!nbj && de && ds){
+    const d1=new Date(de), d2=new Date(ds);
+    nbj=Math.round((d2-d1)/(1000*60*60*24));
+  }
+  const receipt = await getReceiptFileData('e_receipt');
+  const e={
+    id:nextEid++,
+    date:document.getElementById('e_date').value||null,
+    desig:document.getElementById('e_desig').value,
+    log:document.getElementById('e_log').value,
+    plat:document.getElementById('e_plat').value,
+    de:de||null, ds:ds||null, nbj,
+    pj:parseFloat(document.getElementById('e_pj').value)||null,
+    pm:parseFloat(document.getElementById('e_pm').value)||null,
+    comm:parseFloat(document.getElementById('e_comm').value)||null,
+    chg:parseFloat(document.getElementById('e_chg').value)||null,
+    notes:document.getElementById('e_notes').value,
+    receipt
+  };
+  if(!e.desig){showToast('Veuillez saisir une désignation',true);return;}
+  entrees.push(e);
+  sortEntreesByDate();
+  if(FIREBASE_ENABLED) await writeRemoteItem('entrees',e);
+  saveAndRefresh();
+  clearEntreeForm(); showToast('✅ Entrée ajoutée — Net : '+fcfa(calcNet(e)));
+}
+
+async function delEntree(id){
+  if(!confirm('Supprimer cette entrée ?')) return;
+  const entree = entrees.find(e=>e.id===id);
+  if(FIREBASE_ENABLED) await deleteRemoteItem('entrees',entree?.id || id);
+  entrees=entrees.filter(e=>e.id!==id); saveAndRefresh();
+  showToast('🗑️ Entrée supprimée');
+}
+
+function clearEntreeForm(){
+  ['e_date','e_desig','e_de','e_ds','e_nbj','e_pj','e_pm','e_comm','e_chg','e_notes','e_receipt']
+    .forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
+}
+
+// ════════════════ SORTIES ════════════════
+function renderSorties(){
+  sortSortiesByDate();
+  const flt=document.getElementById('filterCat').value;
+  const search=(document.getElementById('searchSorties')?.value||'').toLowerCase().trim();
+  let data=flt?sorties.filter(s=>s.cat===flt):sorties;
+  data = filterByRole(data, false); // locataire ne voit pas les sorties
+  if(currentUser?.role==='locataire'){
+    document.getElementById('tbodySorties').innerHTML='<tr><td colspan="11" class="no-data">🔒 Accès non autorisé — Les dépenses sont réservées aux gestionnaires.</td></tr>';
+    document.getElementById('countSorties').textContent='0 ligne(s)';
+    return;
+  }
+  if(search){
+    data=data.filter(s=>{
+      const hay=[s.date||'',s.desig||'',s.cat||'',s.log||'',s.notes||'',
+        String(s.pu||''),String(s.qte||''),String(s.wave||'')].join(' ').toLowerCase();
+      return hay.includes(search);
+    });
+  }
+  document.getElementById('countSorties').textContent=data.length+' ligne(s)';
+  let html='';
+  if(!data.length){html='<tr><td colspan="11" class="no-data">'+(search?'Aucun résultat pour "'+search+'"':'Aucune dépense')+'</td></tr>';}
+  else{
+    const byCat={};
+    for(const s of data){ (byCat[s.cat]=byCat[s.cat]||[]).push(s); }
+    for(const [cat,rows] of Object.entries(byCat)){
+      html+=`<tr class="sec-row"><td colspan="11">📍 ${cat} — ${rows.length} ligne(s) · Total : ${fcfa(rows.reduce((a,s)=>a+calcTotal(s),0))}</td></tr>`;
+      for(const s of rows){
+        html+=`<tr id="srow-${s.id}">
+          <td>${fdate(s.date)}</td>
+          <td><b>${s.desig||'—'}</b></td>
+          <td>${catBadge(s.cat)}</td>
+          <td><small>${s.log}</small></td>
+          <td class="amount out">${fcfa(s.pu)}</td>
+          <td style="text-align:center">${s.qte||1}</td>
+          <td class="amount out" style="font-size:.8rem">${s.wave?fcfa(s.wave):'—'}</td>
+          <td class="amount out">${fcfa(calcTotal(s))}</td>
+          <td>${renderReceiptLink(s.receipt)}</td>
+          <td><small style="color:#888;max-width:160px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(s.notes||'').replace(/"/g,'&quot;')}">${s.notes||'—'}</small></td>
+          <td>
+            <div class="actions">
+              ${(currentUser?.role==='admin'||currentUser?.role==='proprio'||currentUser?.role==='gestionnaire')?`<button class="btn btn-edit btn-sm" onclick="openEditSortie(${s.id})" title="Modifier">✏️</button>`:''}
+              ${(currentUser?.role==='admin'||currentUser?.role==='proprio')?`<button class="btn btn-danger btn-sm" onclick="delSortie(${s.id})" title="Supprimer">✕</button>`:''}
+            </div>
+          </td>
+        </tr>`;
+      }
+    }
+  }
+  document.getElementById('tbodySorties').innerHTML=html;
+}
+
+async function addSortie(){
+  const receipt = await getReceiptFileData('s_receipt');
+  const s={
+    id:nextSid++,
+    date:document.getElementById('s_date').value||null,
+    desig:document.getElementById('s_desig').value,
+    cat:document.getElementById('s_cat').value,
+    log:document.getElementById('s_log').value,
+    pu:parseFloat(document.getElementById('s_pu').value)||null,
+    qte:parseInt(document.getElementById('s_qte').value)||1,
+    wave:parseFloat(document.getElementById('s_wave').value)||null,
+    notes:document.getElementById('s_notes').value,
+    receipt
+  };
+  if(!s.desig){showToast('Veuillez saisir une désignation',true);return;}
+  sorties.push(s);
+  sortSortiesByDate();
+  if(FIREBASE_ENABLED) await writeRemoteItem('sorties',s);
+  saveAndRefresh();
+  clearSortieForm(); showToast('✅ Dépense ajoutée — Total : '+fcfa(calcTotal(s)));
+}
+
+async function delSortie(id){
+  if(!confirm('Supprimer cette dépense ?')) return;
+  if(FIREBASE_ENABLED) await deleteRemoteItem('sorties',id);
+  sorties=sorties.filter(s=>s.id!==id); saveAndRefresh();
+  showToast('🗑️ Dépense supprimée');
+}
+
+function clearSortieForm(){
+  ['s_date','s_desig','s_pu','s_wave','s_notes','s_receipt'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.getElementById('s_qte').value='1';
+}
+
+// ════════════════ EXPORT ════════════════
+function renderExport(){
+  document.getElementById('previewEntrees').textContent=
+    JSON.stringify(entrees.slice(-5).map(e=>({date:e.date,desig:e.desig,log:e.log,net:calcNet(e)})),null,2);
+  document.getElementById('previewSorties').textContent=
+    JSON.stringify(sorties.slice(-5).map(s=>({date:s.date,desig:s.desig,cat:s.cat,total:calcTotal(s)})),null,2);
+  document.getElementById('previewAudit').textContent=
+    JSON.stringify(auditRows.slice(-5).map(r=>({date:r.date||r.Date,type:r.type||r.Type,desig:r.DESIGNATION||r.Désignation,brut:safeNum(matchValue(r,['montant brut','brut'])),net:safeNum(matchValue(r,['montant net','net']))})),null,2);
+}
+
+function openAuditImporter(){
+  document.getElementById('auditFileInput').click();
+}
+
+function loadAuditFile(e){
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(['xlsx','xls'].includes(ext)){
+    parseXlsxFile(file).then(setAuditRows).catch(err=>showToast('Erreur import audit : '+err.message,true));
+  } else if(ext==='csv'){
+    parseCsvFile(file).then(setAuditRows).catch(err=>showToast('Erreur import audit : '+err.message,true));
+  } else if(ext==='json'){
+    parseJsonFile(file).then(setAuditRows).catch(err=>showToast('Erreur import audit : '+err.message,true));
+  } else {
+    showToast('Format d\'audit non supporté : '+ext,true);
+  }
+  e.target.value='';
+}
+
+function parseXlsxFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try{
+        const data = new Uint8Array(ev.target.result);
+        const workbook = XLSX.read(data,{type:'array'});
+        const sheetName = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{defval:''});
+        resolve(rows);
+      } catch(err){ reject(err); }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function parseCsvFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try{
+        const workbook = XLSX.read(ev.target.result,{type:'string', raw:false});
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{defval:''});
+        resolve(rows);
+      } catch(err){ reject(err); }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsText(file,'UTF-8');
+  });
+}
+
+function parseJsonFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try{
+        const json = JSON.parse(ev.target.result);
+        const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
+        resolve(rows);
+      } catch(err){ reject(err); }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsText(file,'UTF-8');
+  });
+}
+
+function setAuditRows(rows){
+  auditRows = rows || [];
+  localStorage.setItem('emm_audit', JSON.stringify(auditRows));
+  if(FIREBASE_ENABLED) writeRemoteCollection('audit',auditRows.map((row,index)=>({...row,id:row.id||'audit_'+index})));
+  renderAudit();
+  showToast('✅ Audit importé : '+auditRows.length+' ligne(s)');
+}
+
+function renderAudit(){
+  const auditBody = document.getElementById('tbodyAudit');
+  const auditCount = document.getElementById('countAudit');
+  if(!auditBody || !auditCount) return;
+  const search = (document.getElementById('searchAudit')?.value||'').toLowerCase().trim();
+  let data = auditRows.slice();
+  if(search){
+    data = data.filter(row => Object.values(row).some(v => String(v||'').toLowerCase().includes(search)));
+  }
+  auditCount.textContent = data.length+' ligne(s)';
+  let html = '';
+  if(!data.length){
+    html = '<tr><td colspan="7" class="no-data">'+(search?'Aucun résultat':'Aucune donnée d\'audit chargée')+'</td></tr>';
+  } else {
+    data.forEach(row => {
+      const brut = safeNum(matchValue(row,['montant brut','brut','amount brut','montant']));
+      const fees = safeNum(matchValue(row,['frais / commissions','frais','commissions','fees','fee']));
+      const net = safeNum(matchValue(row,['montant net','net','amount net']));
+      const date = formatAuditDate(matchValue(row,['date','date opération','date transaction','date audit']));
+      const type = matchValue(row,['type','categorie','catégorie','transaction']);
+      const desig = matchValue(row,['désignation','designation','libellé','description','detail']);
+      const status = matchValue(row,['statut audit','statut','status']) || '';
+      html += `<tr><td>${date}</td><td>${type||'—'}</td><td>${desig||'—'}</td><td class="amount">${fcfa(brut)}</td><td class="amount out">${fcfa(fees)}</td><td class="amount">${fcfa(net)}</td><td>${status||'—'}</td></tr>`;
+    });
+  }
+  auditBody.innerHTML = html;
+  renderAuditSummary();
+}
+
+function matchValue(row, keys){
+  if(!row) return '';
+  const normalized = {};
+  Object.keys(row).forEach(k => { normalized[k.toString().trim().toLowerCase()] = row[k]; });
+  for(const key of keys){ if(normalized[key] != null && normalized[key] !== '') return normalized[key]; }
+  for(const [k,v] of Object.entries(normalized)){
+    if(keys.some(key => k.includes(key)) && v != null && v !== '') return v;
+  }
+  return '';
+}
+
+function formatAuditDate(value){
+  if(!value) return '—';
+  if(typeof value === 'number'){
+    const date = XLSX.SSF.parse_date_code(value);
+    if(date){
+      return `${String(date.d).padStart(2,'0')}/${String(date.m).padStart(2,'0')}/${date.y}`;
+    }
+  }
+  const d = new Date(value);
+  if(!isNaN(d)) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  return String(value);
+}
+
+function safeNum(value){
+  if(value == null || value === '') return 0;
+  const text = String(value).replace(/\s/g,'').replace(/,/g,'.').replace(/[^0-9.\-]/g,'');
+  return parseFloat(text) || 0;
+}
+
+function getAuditTotals(){
+  return auditRows.reduce((acc,row) => {
+    acc.brut += safeNum(matchValue(row,['montant brut','brut','amount brut','montant']));
+    acc.fees += safeNum(matchValue(row,['frais / commissions','frais','commissions','fees','fee']));
+    acc.net += safeNum(matchValue(row,['montant net','net','amount net']));
+    return acc;
+  }, {brut:0,fees:0,net:0});
+}
+
+function renderAuditSummary(){
+  const summaryEl = document.getElementById('auditSummary');
+  const compareEl = document.getElementById('auditCompare');
+  if(!summaryEl || !compareEl) return;
+  const totals = getAuditTotals();
+  const te = totalEntrees();
+  const ts = totalSorties();
+  const diff = totals.net - (te - ts);
+  summaryEl.innerHTML = `
+    <div class="synth-row"><span class="lbl">Audit Brut</span><span class="val">${fcfa(totals.brut)}</span></div>
+    <div class="synth-row"><span class="lbl">Audit Frais</span><span class="val">${fcfa(totals.fees)}</span></div>
+    <div class="synth-row"><span class="lbl">Audit Net</span><span class="val">${fcfa(totals.net)}</span></div>
+    <div class="synth-total"><span class="lbl">Entrées - Sorties système</span><span class="val">${fcfa(te-ts)}</span></div>
+  `;
+  compareEl.innerHTML = `
+    <div class="synth-row"><span class="lbl">Différence Net audit vs gestion</span><span class="val ${diff>=0?'green':'red'}">${fcfa(diff)}</span></div>
+    <div class="synth-row"><span class="lbl">Total entrées système</span><span class="val green">${fcfa(te)}</span></div>
+    <div class="synth-row"><span class="lbl">Total sorties système</span><span class="val red">${fcfa(ts)}</span></div>
+  `;
+}
+
+async function ajouterMaison(){
+  const article = document.getElementById('m_article').value.trim();
+  const piece = document.getElementById('m_piece').value.trim();
+  const quantite = parseInt(document.getElementById('m_quantite').value,10);
+  if(!article || !piece || isNaN(quantite) || quantite < 1){ showToast('Veuillez remplir tous les champs de stock.', true); return; }
+  const item={id:Date.now(),article,piece,quantite};
+  stockMaison.push(item);
+  if(FIREBASE_ENABLED) await writeRemoteItem('stockMaison',item);
+  renderStockMaison();
+  sauvegarderStock();
+  document.getElementById('m_article').value='';
+  document.getElementById('m_piece').value='';
+  document.getElementById('m_quantite').value='1';
+  showToast('✅ Article ajouté au stock');
+}
+
+function renderStockMaison(){
+  const tbody = document.getElementById('table-maison-body');
+  if(!tbody) return;
+  const searchInput = document.getElementById('searchMaison');
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+  tbody.innerHTML='';
+  
+  let visibleCount = 0;
+  stockMaison.forEach((item,index)=>{
+    const matchArticle = item.article.toLowerCase().includes(searchTerm);
+    const matchPiece = item.piece.toLowerCase().includes(searchTerm);
+    
+    if(!searchTerm || matchArticle || matchPiece){
+      visibleCount++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${item.article}</td><td>${item.piece}</td><td>${item.quantite}</td><td><button class="btn btn-danger btn-sm" onclick="supprimerMaison(${index})">Supprimer</button></td>`;
+      tbody.appendChild(tr);
+    }
+  });
+  
+  const countEl = document.getElementById('countMaison');
+  if(countEl) countEl.textContent = visibleCount + ' article(s)';
+  
+  if(visibleCount===0 && stockMaison.length>0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" class="no-data">Aucun article trouvé</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+async function supprimerMaison(index){
+  if(!confirm('Supprimer cet article du stock ?')) return;
+  const item=stockMaison[index];
+  if(FIREBASE_ENABLED && item?.id) await deleteRemoteItem('stockMaison',item.id);
+  stockMaison.splice(index,1);
+  renderStockMaison();
+  sauvegarderStock();
+  showToast('Article supprimé');
+}
+
+async function ajouterChantier(){
+  const date = document.getElementById('c_date').value;
+  const materiau = document.getElementById('c_materiau').value.trim();
+  const bon = document.getElementById('c_bon').value.trim()||'-';
+  const type = document.getElementById('c_type').value;
+  const quantite = parseInt(document.getElementById('c_quantite').value,10);
+  const zone = document.getElementById('c_zone').value.trim()||'-';
+  const responsable = document.getElementById('c_responsable').value.trim()||'-';
+  if(!date || !materiau || isNaN(quantite) || quantite<1){ showToast('Veuillez remplir tous les champs chantier.', true); return; }
+  const item={id:Date.now(),date,materiau,bon,type,quantite,zone,responsable};
+  stockChantier.push(item);
+  if(FIREBASE_ENABLED) await writeRemoteItem('stockChantier',item);
+  renderStockChantier();
+  calculerStocksChantier();
+  sauvegarderStock();
+  document.getElementById('c_materiau').value='';
+  document.getElementById('c_bon').value='';
+  document.getElementById('c_quantite').value='1';
+  document.getElementById('c_zone').value='';
+  document.getElementById('c_responsable').value='';
+  showToast('✅ Mouvement chantier enregistré');
+}
+
+function renderStockChantier(){
+  const tbody = document.getElementById('table-chantier-body');
+  if(!tbody) return;
+  const searchInput = document.getElementById('searchChantier');
+  const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+  tbody.innerHTML='';
+  
+  let visibleCount = 0;
+  stockChantier.forEach((item,index)=>{
+    const matchMateriau = item.materiau.toLowerCase().includes(searchTerm);
+    const matchBon = item.bon.toLowerCase().includes(searchTerm);
+    const matchZone = item.zone.toLowerCase().includes(searchTerm);
+    const matchResponsable = item.responsable.toLowerCase().includes(searchTerm);
+    
+    if(!searchTerm || matchMateriau || matchBon || matchZone || matchResponsable){
+      visibleCount++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${formatAuditDate(item.date)}</td><td>${item.materiau}</td><td>${item.bon}</td><td>${item.type}</td><td>${item.quantite}</td><td>${item.zone}</td><td>${item.responsable}</td><td><button class="btn btn-danger btn-sm" onclick="supprimerChantier(${index})">Supprimer</button></td>`;
+      tbody.appendChild(tr);
+    }
+  });
+  
+  const countEl = document.getElementById('countChantier');
+  if(countEl) countEl.textContent = visibleCount + ' mouvement(s)';
+  
+  if(visibleCount===0 && stockChantier.length>0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="8" class="no-data">Aucun mouvement trouvé</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+async function supprimerChantier(index){
+  if(!confirm('Supprimer ce mouvement chantier ?')) return;
+  const item=stockChantier[index];
+  if(FIREBASE_ENABLED && item?.id) await deleteRemoteItem('stockChantier',item.id);
+  stockChantier.splice(index,1);
+  renderStockChantier();
+  calculerStocksChantier();
+  sauvegarderStock();
+  showToast('Mouvement chantier supprimé');
+}
+
+function calculerStocksChantier(){
+  const stocks = {};
+  stockChantier.forEach(item=>{
+    const key = item.materiau.toUpperCase();
+    if(!stocks[key]) stocks[key] = {entrees:0,sorties:0};
+    if(item.type.toLowerCase().includes('entrée') || item.type.includes('+')) stocks[key].entrees += item.quantite;
+    else stocks[key].sorties += item.quantite;
+  });
+  const tbody = document.getElementById('table-total-chantier-body');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  Object.entries(stocks).forEach(([materiau,data])=>{
+    const stockNet = data.entrees - data.sorties;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${materiau}</strong></td><td style="color:#27ae60">+ ${data.entrees}</td><td style="color:#c0392b">- ${data.sorties}</td><td class="total-box" style="${stockNet<0?'color:#c0392b;font-weight:bold;':''}">${stockNet}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function sauvegarderStock(){
+  localStorage.setItem('stock_maison',JSON.stringify(stockMaison));
+  localStorage.setItem('stock_chantier',JSON.stringify(stockChantier));
+}
+
+async function chargerDonnees(){
+  stockMaison = JSON.parse(localStorage.getItem('stock_maison')||'[]');
+  stockChantier = JSON.parse(localStorage.getItem('stock_chantier')||'[]');
+  const savedAudit = localStorage.getItem('emm_audit');
+  auditRows = savedAudit ? JSON.parse(savedAudit) : [];
+  if(FIREBASE_ENABLED && firebaseUser){
+    const [remoteMaison,remoteChantier,remoteAudit] = await Promise.all([
+      readRemoteCollection('stockMaison'),
+      readRemoteCollection('stockChantier'),
+      readRemoteCollection('audit')
+    ]);
+    if(remoteMaison?.length) stockMaison=remoteMaison;
+    else await writeRemoteCollection('stockMaison',stockMaison.map((x,i)=>({...x,id:x.id||'m_'+i})));
+    if(remoteChantier?.length) stockChantier=remoteChantier;
+    else await writeRemoteCollection('stockChantier',stockChantier.map((x,i)=>({...x,id:x.id||'c_'+i})));
+    if(remoteAudit?.length) auditRows=remoteAudit;
+    localStorage.setItem('stock_maison',JSON.stringify(stockMaison));
+    localStorage.setItem('stock_chantier',JSON.stringify(stockChantier));
+    localStorage.setItem('emm_audit',JSON.stringify(auditRows));
+  }
+  renderStockMaison();
+  renderStockChantier();
+  calculerStocksChantier();
+  renderAudit();
+}
+
+function exporterExcelMaison(){
+  const headers=['Article','Emplacement','Quantité'];
+  const rows=stockMaison.map(item=>[item.article,item.piece,item.quantite]);
+  downloadCsv(headers,rows,'stock_maison');
+}
+
+function exporterExcelChantier(){
+  const headers=['Date','Matière','N° Bon','Type','Quantité','Zone','Responsable'];
+  const rows=stockChantier.map(item=>[item.date,item.materiau,item.bon,item.type,item.quantite,item.zone,item.responsable]);
+  downloadCsv(headers,rows,'stock_chantier');
+}
+
+function downloadCsv(headers,rows,name){
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${name}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function exportCSV(type){
+  let rows, headers, data;
+  if(type==='entrees'){
+    headers=['ID','Date','Désignation','Logement','Plateforme','D. Entrée','D. Sortie','Nb Jours','Prix/Jour','Prix/Mois','Brut','Commission','Charges','Net','Reçu','Notes'];
+    data=entrees.map(e=>[e.id,e.date||'',e.desig,e.log,e.plat,e.de||'',e.ds||'',e.nbj||'',e.pj||'',e.pm||'',calcBrut(e),e.comm||0,e.chg||0,calcNet(e),e.receipt?.name||'',e.notes]);
+  } else if(type==='audit') {
+    headers = auditRows.length ? Object.keys(auditRows[0]) : ['Date','Type','Désignation','Montant Brut','Frais / Commissions','Montant Net'];
+    data = auditRows.map(r => headers.map(h => r[h] != null ? r[h] : ''));
+  } else {
+    headers=['ID','Date','Désignation','Catégorie','Logement','P.U.','Qté','Frais Wave','Total','Reçu','Notes'];
+    data=sorties.map(s=>[s.id,s.date||'',s.desig,s.cat,s.log,s.pu||0,s.qte||1,s.wave||0,calcTotal(s),s.receipt?.name||'',s.notes]);
+  }
+  const csv=[headers,...data].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`gestion_${type}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  showToast('⬇️ CSV téléchargé');
+}
+
+function exportAll(){
+  const d={entrees,sorties,exported:new Date().toISOString(),totaux:{entrees:totalEntrees(),sorties:totalSorties(),solde:totalEntrees()-totalSorties()}};
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`gestion_immeuble_emmanuel_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  showToast('⬇️ JSON exporté');
+}
+
+function importJSON(){document.getElementById('fileInput').click();}
+function loadJSON(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.entrees && d.sorties){
+        entrees=d.entrees; sorties=d.sorties;
+        nextEid=Math.max(...entrees.map(e=>e.id))+1;
+        nextSid=Math.max(...sorties.map(s=>s.id))+1;
+        sortEntreesByDate();
+        sortSortiesByDate();
+        saveAndRefresh(); showToast('📂 Données importées avec succès !');
+      } else showToast('Format JSON invalide',true);
+    }catch(err){showToast('Erreur lecture JSON',true);}
+  };
+  r.readAsText(f);
+}
+
+// ════════════════ MODIFICATION ENTRÉE ════════════════
+let editEid=null;
+
+function openEditEntree(id){
+  const e=entrees.find(x=>x.id===id);
+  if(!e) return;
+  editEid=id;
+  document.getElementById('me_date').value=e.date||'';
+  document.getElementById('me_desig').value=e.desig||'';
+  setSelectVal('me_log',e.log);
+  setSelectVal('me_plat',e.plat);
+  document.getElementById('me_de').value=e.de||'';
+  document.getElementById('me_ds').value=e.ds||'';
+  document.getElementById('me_nbj').value=e.nbj||'';
+  document.getElementById('me_pj').value=e.pj||'';
+  document.getElementById('me_pm').value=e.pm||'';
+  document.getElementById('me_comm').value=e.comm||'';
+  document.getElementById('me_chg').value=e.chg||'';
+  document.getElementById('me_notes').value=e.notes||'';
+  document.getElementById('me_receipt_current').innerHTML = renderReceiptLink(e.receipt);
+  document.getElementById('me_receipt').value = '';
+  updateMePreview();
+  document.getElementById('modalEditEntree').classList.add('open');
+  // Surligner la ligne
+  document.querySelectorAll('tr.highlight-row').forEach(r=>r.classList.remove('highlight-row'));
+  const row=document.getElementById('erow-'+id);
+  if(row) row.classList.add('highlight-row');
+}
+
+function updateMePreview(){
+  const pj=parseFloat(document.getElementById('me_pj').value)||null;
+  const pm=parseFloat(document.getElementById('me_pm').value)||null;
+  const nbj=parseInt(document.getElementById('me_nbj').value)||null;
+  const comm=parseFloat(document.getElementById('me_comm').value)||0;
+  const chg=parseFloat(document.getElementById('me_chg').value)||0;
+  const brut=pm||(nbj&&pj?nbj*pj:0);
+  const net=brut-comm-chg;
+  document.getElementById('me_preview_net').textContent=fcfa(net);
+}
+
+async function saveEditEntree(){
+  const e=entrees.find(x=>x.id===editEid);
+  if(!e){showToast('Entrée introuvable',true);return;}
+  const de=document.getElementById('me_de').value;
+  const ds=document.getElementById('me_ds').value;
+  let nbj=parseInt(document.getElementById('me_nbj').value)||null;
+  if(!nbj&&de&&ds) nbj=Math.round((new Date(ds)-new Date(de))/(1000*60*60*24));
+  const desig=document.getElementById('me_desig').value.trim();
+  if(!desig){showToast('Désignation obligatoire',true);return;}
+  const newReceipt = await getReceiptFileData('me_receipt');
+  e.date=document.getElementById('me_date').value||null;
+  e.desig=desig;
+  e.log=document.getElementById('me_log').value;
+  e.plat=document.getElementById('me_plat').value;
+  e.de=de||null; e.ds=ds||null; e.nbj=nbj;
+  e.pj=parseFloat(document.getElementById('me_pj').value)||null;
+  e.pm=parseFloat(document.getElementById('me_pm').value)||null;
+  e.comm=parseFloat(document.getElementById('me_comm').value)||null;
+  e.chg=parseFloat(document.getElementById('me_chg').value)||null;
+  e.notes=document.getElementById('me_notes').value;
+  if(newReceipt) e.receipt=newReceipt;
+  sortEntreesByDate();
+  if(FIREBASE_ENABLED) await writeRemoteItem('entrees',e);
+  saveAndRefresh();
+  closeModal('modalEditEntree');
+  showToast('✅ Entrée modifiée — Net : '+fcfa(calcNet(e)));
+  // Flash surbrillance sur la ligne mise à jour
+  setTimeout(()=>{
+    const row=document.getElementById('erow-'+editEid);
+    if(row){row.classList.add('highlight-row');setTimeout(()=>row.classList.remove('highlight-row'),2000);}
+  },100);
+}
+
+// ════════════════ MODIFICATION SORTIE ════════════════
+let editSid=null;
+
+function openEditSortie(id){
+  const s=sorties.find(x=>x.id===id);
+  if(!s) return;
+  editSid=id;
+  document.getElementById('ms_date').value=s.date||'';
+  document.getElementById('ms_desig').value=s.desig||'';
+  setSelectVal('ms_cat',s.cat);
+  setSelectVal('ms_log',s.log);
+  document.getElementById('ms_pu').value=s.pu||'';
+  document.getElementById('ms_qte').value=s.qte||1;
+  document.getElementById('ms_wave').value=s.wave||'';
+  document.getElementById('ms_notes').value=s.notes||'';
+  document.getElementById('ms_receipt_current').innerHTML = renderReceiptLink(s.receipt);
+  document.getElementById('ms_receipt').value = '';
+  updateMsPreview();
+  document.getElementById('modalEditSortie').classList.add('open');
+  document.querySelectorAll('tr.highlight-row').forEach(r=>r.classList.remove('highlight-row'));
+  const row=document.getElementById('srow-'+id);
+  if(row) row.classList.add('highlight-row');
+}
+
+function updateMsPreview(){
+  const pu=parseFloat(document.getElementById('ms_pu').value)||0;
+  const qte=parseInt(document.getElementById('ms_qte').value)||1;
+  const wave=parseFloat(document.getElementById('ms_wave').value)||0;
+  document.getElementById('ms_preview_total').textContent=fcfa(pu*qte+wave);
+}
+
+async function saveEditSortie(){
+  const s=sorties.find(x=>x.id===editSid);
+  if(!s){showToast('Dépense introuvable',true);return;}
+  const desig=document.getElementById('ms_desig').value.trim();
+  if(!desig){showToast('Désignation obligatoire',true);return;}
+  const newReceipt = await getReceiptFileData('ms_receipt');
+  s.date=document.getElementById('ms_date').value||null;
+  s.desig=desig;
+  s.cat=document.getElementById('ms_cat').value;
+  s.log=document.getElementById('ms_log').value;
+  s.pu=parseFloat(document.getElementById('ms_pu').value)||null;
+  s.qte=parseInt(document.getElementById('ms_qte').value)||1;
+  s.wave=parseFloat(document.getElementById('ms_wave').value)||null;
+  s.notes=document.getElementById('ms_notes').value;
+  if(newReceipt) s.receipt=newReceipt;
+  sortSortiesByDate();
+  if(FIREBASE_ENABLED) await writeRemoteItem('sorties',s);
+  saveAndRefresh();
+  closeModal('modalEditSortie');
+  showToast('✅ Dépense modifiée — Total : '+fcfa(calcTotal(s)));
+  setTimeout(()=>{
+    const row=document.getElementById('srow-'+editSid);
+    if(row){row.classList.add('highlight-row');setTimeout(()=>row.classList.remove('highlight-row'),2000);}
+  },100);
+}
+
+// ════════════════ UTILITAIRES MODAL ════════════════
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.querySelectorAll('tr.highlight-row').forEach(r=>r.classList.remove('highlight-row'));
+}
+function setSelectVal(id,val){
+  const sel=document.getElementById(id);
+  for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===val){sel.selectedIndex=i;return;}}
+}
+// Fermer modal en cliquant hors de la boîte
+document.addEventListener('DOMContentLoaded',()=>{
+  ['modalEditEntree','modalEditSortie'].forEach(mid=>{
+    document.getElementById(mid).addEventListener('click',function(e){
+      if(e.target===this) closeModal(mid);
+    });
+  });
+  // Sync preview live dans les modals
+  ['me_pj','me_pm','me_nbj','me_comm','me_chg'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input',updateMePreview);
+  });
+  if(document.getElementById('c_date')) document.getElementById('c_date').valueAsDate = new Date();
+});
+
+// ════════════════ TOAST ════════════════
+function showToast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show'+(err?' error':'');
+  setTimeout(()=>t.className='',2800);
+}
+
+// ════════════════════════════════════════════════════
+// ACCÈS DIRECT
+// ════════════════════════════════════════════════════
+const ROLE_COLORS = {admin:'#F39C12',proprio:'#2E6DB4',gestionnaire:'#9B59B6',locataire:'#27AE60'};
+const ROLE_LABELS = {admin:'Administrateur',proprio:'Propriétaire',gestionnaire:'Gestionnaire',locataire:'Locataire'};
+const ROLE_EMOJIS = {admin:'🟡',proprio:'🔵',gestionnaire:'🟣',locataire:'🟢'};
+
+let currentUser = {id:'local-admin',nom:'Administration',role:'admin'};
+
+function addJournalEntry(action){
+  if(!currentUser) return;
+  const j = JSON.parse(localStorage.getItem('emm_journal')||'[]');
+  j.push({ts:new Date().toLocaleString('fr-FR'),user:currentUser.nom,role:ROLE_LABELS[currentUser.role],action});
+  localStorage.setItem('emm_journal', JSON.stringify(j.slice(-500)));
+}
+
+function applyRoleUI(){
+  if(!currentUser) return;
+  const r = currentUser.role;
+  const canWrite=(r==='admin'||r==='proprio'||r==='gestionnaire');
+  document.querySelectorAll('#panel-entrees .card:first-child,#panel-sorties .card:first-child')
+    .forEach(c=>c.style.display=canWrite?'':'none');
+  renderSynthese(); renderEntrees(); renderSorties();
+}
+
+function filterByRole(data, isEntree){
+  if(!currentUser) return data;
+  if(currentUser.role==='locataire' && currentUser.logement){
+    return isEntree ? data.filter(e=>e.log===currentUser.logement) : [];
+  }
+  return data;
+}
+
+async function startApp(){
+  await loadData();
+  await chargerDonnees();
+  document.getElementById('loginScreen').classList.add('hidden');
+  applyRoleUI();
+}
+
+async function doLogin(){
+  const pseudo=document.getElementById('loginPseudo').value.trim();
+  const password=document.getElementById('loginPass').value;
+  const errorBox=document.getElementById('loginError');
+  errorBox.classList.remove('show');
+  if(!pseudo || !password){
+    errorBox.textContent='Saisissez votre pseudo et votre mot de passe.';
+    errorBox.classList.add('show');
+    return;
+  }
+  if(!authRemote){
+    errorBox.textContent='Firebase n’est pas disponible.';
+    errorBox.classList.add('show');
+    return;
+  }
+  try{
+    const result=await authRemote.signInWithEmailAndPassword(pseudoToEmail(pseudo),password);
+    firebaseUser=result.user;
+    await startApp();
+  }catch(error){
+    const messages={
+      'auth/user-not-found':'Pseudo inconnu.',
+      'auth/wrong-password':'Mot de passe incorrect.',
+      'auth/invalid-credential':'Pseudo ou mot de passe incorrect.',
+      'auth/invalid-email':'Pseudo invalide.',
+      'auth/too-many-requests':'Trop de tentatives. Réessayez plus tard.'
+    };
+    errorBox.textContent=messages[error.code]||'Connexion impossible. Vérifiez votre compte Firebase.';
+    errorBox.classList.add('show');
+  }
+}
+
+// ════════════════ INIT ════════════════
+(async function initializeApp(){
+  try{
+    initFirebase();
+    if(FIREBASE_ENABLED && authRemote.currentUser && !authRemote.currentUser.isAnonymous){
+      firebaseUser=authRemote.currentUser;
+      await startApp();
+    }
+  }catch(error){
+    console.error('Erreur de démarrage',error);
+  }
+  renderSynthese();
+})();
+</script>
+</body>
+</html>
+<div id="loginScreen">
+  <div class="login-card">
+    <h2>Gestion Immeuble</h2>
+    <p>Connectez-vous avec votre pseudo</p>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-field">
+      <label for="loginPseudo">Pseudo</label>
+      <input type="text" id="loginPseudo" placeholder="Votre pseudo" autocomplete="username"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label for="loginPass">Mot de passe</label>
+      <input type="password" id="loginPass" placeholder="Votre mot de passe" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Se connecter</button>
+  </div>
+</div>
